@@ -2,6 +2,9 @@ package dev.lifesteal.lifesteal;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.lifesteal.lifesteal.item.BeaconOfLifeItem;
 import dev.lifesteal.lifesteal.item.HeartItem;
 import dev.lifesteal.lifesteal.config.LifestealConfig;
@@ -54,6 +57,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -209,6 +213,7 @@ public class Lifesteal implements ModInitializer {
                                             getString(context, "setting")
                                     ))
                                     .then(argument("value", word())
+                                            .suggests(Lifesteal::suggestConfigValue)
                                             .executes(context -> executeSetConfigOption(
                                                     context.getSource(),
                                                     getString(context, "setting"),
@@ -608,6 +613,22 @@ public class Lifesteal implements ModInitializer {
         Text newValue = Text.literal(option.currentValueAsText()).formatted(Formatting.GREEN);
         source.sendFeedback(() -> Text.literal(option.key + " set to ").append(newValue), true);
         return 1;
+    }
+
+    private static CompletableFuture<Suggestions> suggestConfigValue(CommandContext<ServerCommandSource> context, SuggestionsBuilder builder) {
+        LifestealConfig.ConfigOption option = LifestealConfig.getOption(getString(context, "setting"));
+        if (option == null) {
+            return builder.buildFuture();
+        }
+
+        if (option.type == LifestealConfig.ConfigOption.Type.BOOLEAN) {
+            return CommandSource.suggestMatching(List.of("true", "false"), builder);
+        }
+        return CommandSource.suggestMatching(List.of(
+                Integer.toString(option.minInteger()),
+                Integer.toString(option.currentIntegerValue()),
+                Integer.toString(option.maxInteger())
+        ), builder);
     }
 
     private static Text buildOptionToggle(LifestealConfig.ConfigOption option, boolean value, boolean isCurrentValueDefault) {

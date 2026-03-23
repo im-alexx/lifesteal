@@ -66,7 +66,7 @@ public final class LifestealConfig {
                 config.allowNetheriteUpgrades = getBoolean(lines, "allowNetheriteUpgrades", config.allowNetheriteUpgrades);
                 config.balancedMace = getBoolean(lines, "balancedMace", config.balancedMace);
                 config.disableEnderPearls = getBoolean(lines, "disableEnderPearls", config.disableEnderPearls);
-                config.disableCrystalDamage = getBoolean(lines, "disableCrystalDamage", config.disableCrystalDamage);
+                config.disableCrystalDamage = getBoolean(lines, "disableEndCrystalDamage", getBoolean(lines, "disableCrystalDamage", config.disableCrystalDamage));
                 config.enableRiptideCooldown = getBoolean(lines, "enableRiptideCooldown", config.enableRiptideCooldown);
                 config.maxHearts = getInt(lines, "maxHearts", config.maxHearts);
                 config.riptideCooldown = getInt(lines, "riptideCooldown", config.riptideCooldown);
@@ -113,7 +113,7 @@ balancedMace = %s
 disableEnderPearls: %s
 
 # Makes crystals be unable to do any environment and player damage
-disableCrystalDamage: %s
+disableEndCrystalDamage: %s
 
 # Enables cooldown for Riptide tridents
 enableRiptideCooldown: %s
@@ -191,7 +191,7 @@ riptideCooldown: %s
             config.allowNetheriteUpgrades = extractBoolean(json, "allowNetheriteUpgrades", config.allowNetheriteUpgrades);
             config.balancedMace = extractBoolean(json, "balancedMace", config.balancedMace);
             config.disableEnderPearls = extractBoolean(json, "disableEnderPearls", config.disableEnderPearls);
-            config.disableCrystalDamage = extractBoolean(json, "disableCrystalDamage", config.disableCrystalDamage);
+            config.disableCrystalDamage = extractBoolean(json, "disableEndCrystalDamage", extractBoolean(json, "disableCrystalDamage", config.disableCrystalDamage));
             config.enableRiptideCooldown = extractBoolean(json, "enableRiptideCooldown", config.enableRiptideCooldown);
             config.maxHearts = extractInt(json, "maxHearts", config.maxHearts);
             config.riptideCooldown = extractInt(json, "riptideCooldown", config.riptideCooldown);
@@ -372,7 +372,7 @@ riptideCooldown: %s
                     value -> LifestealConfig.get().disableEnderPearls = value
             ),
             new ConfigOption(
-                    "disableCrystalDamage",
+                    "disableEndCrystalDamage",
                     "Makes crystals be unable to do any environment and player damage",
                     DEFAULTS.disableCrystalDamage,
                     () -> LifestealConfig.get().disableCrystalDamage,

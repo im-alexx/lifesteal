@@ -21,6 +21,14 @@ public class EndCrystalNoExplosionMixin {
         }
 
         EndCrystalEntity crystal = (EndCrystalEntity) (Object) this;
+        if (crystal.isRemoved() || crystal.isInvulnerable()) {
+            cir.setReturnValue(false);
+            return;
+        }
+        if (source.getAttacker() == null && source.getSource() == null) {
+            return;
+        }
+
         double x = crystal.getX();
         double y = crystal.getY();
         double z = crystal.getZ();
