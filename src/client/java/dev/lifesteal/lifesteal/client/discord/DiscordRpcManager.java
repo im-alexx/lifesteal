@@ -2,12 +2,19 @@ package dev.lifesteal.lifesteal.client.discord;
 
 import com.jagrosh.discordipc.IPCClient;
 import com.jagrosh.discordipc.entities.ActivityType;
+import com.jagrosh.discordipc.entities.Callback;
+import com.jagrosh.discordipc.entities.Packet;
 import com.jagrosh.discordipc.entities.RichPresence;
 import com.jagrosh.discordipc.entities.pipe.PipeStatus;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 public final class DiscordRpcManager {
     private static final Logger LOGGER = LoggerFactory.getLogger("lifesteal-discord-rpc");
@@ -25,7 +32,7 @@ public final class DiscordRpcManager {
     private DiscordRpcManager() {
     }
 
-    public static void tick(MinecraftClient minecraftClient, boolean enabled) {
+    public static synchronized void tick(MinecraftClient minecraftClient, boolean enabled) {
         ensureShutdownHookRegistered();
         if (!enabled) {
             shutdown();
@@ -64,7 +71,7 @@ public final class DiscordRpcManager {
         }
     }
 
-    public static void shutdown() {
+    public static synchronized void shutdown() {
         IPCClient active = client;
         client = null;
         if (active == null) {
@@ -82,6 +89,7 @@ public final class DiscordRpcManager {
         }
 
         try {
+            clearActivity(active, status);
             active.close();
             LOGGER.info("Discord RPC shutdown completed (previous status: {}).", status);
         } catch (Throwable throwable) {
@@ -93,7 +101,7 @@ public final class DiscordRpcManager {
         }
     }
 
-    public static void resetState() {
+    public static synchronized void resetState() {
         updateTicker = 0;
         lastDetails = "";
         lastState = "";
@@ -143,5 +151,33 @@ public final class DiscordRpcManager {
         }
         Runtime.getRuntime().addShutdownHook(new Thread(DiscordRpcManager::shutdown, "lifesteal-discord-rpc-shutdown"));
         shutdownHookRegistered = true;
+    }
+
+    private static void clearActivity(IPCClient active, PipeStatus status) {
+        if (status != PipeStatus.CONNECTED) {
+            return;
+        }
+
+        try {
+            Field pipeField = IPCClient.class.getDeclaredField("pipe");
+            pipeField.setAccessible(true);
+            Object pipe = pipeField.get(active);
+            if (pipe == null) {
+                return;
+            }
+
+            JsonObject payload = new JsonObject();
+            payload.addProperty("cmd", "SET_ACTIVITY");
+            JsonObject args = new JsonObject();
+            args.addProperty("pid", (int) ProcessHandle.current().pid());
+            args.add("activity", JsonNull.INSTANCE);
+            payload.add("args", args);
+
+            Method send = pipe.getClass().getMethod("send", Packet.OpCode.class, JsonObject.class, Callback.class);
+            send.invoke(pipe, Packet.OpCode.FRAME, payload, null);
+            LOGGER.info("Sent explicit Discord RPC clear-activity frame before shutdown.");
+        } catch (Throwable throwable) {
+            LOGGER.debug("Failed to send explicit clear-activity frame during RPC shutdown.", throwable);
+        }
     }
 }

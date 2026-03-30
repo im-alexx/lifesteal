@@ -8,19 +8,20 @@ import net.minecraft.util.Formatting;
 
 public class MeteorDetectedScreen extends Screen {
     private static final Text TITLE = Text.literal("Game crashed... almost");
-    private static final Text[] MESSAGE_LINES = new Text[] {
-            Text.literal("Whoops!").formatted(Formatting.RED),
-            Text.empty()
-                    .append(Text.literal("Lifesteal Mod").formatted(Formatting.GREEN))
-                    .append(Text.literal(" detected you using hacks, specifically "))
-                    .append(Text.literal("Meteor Client").formatted(Formatting.RED))
-                    .append(Text.literal(".")),
-            Text.literal("Using hacks is a big no-no! It's also against The Minecraft EULA and Community Standards!"),
-            Text.literal("I'm gonna have to ask you to quickly go and delete that, kindly.")
-    };
+    private final Text[] messageLines;
 
-    public MeteorDetectedScreen() {
+    public MeteorDetectedScreen(String detectedClientName) {
         super(TITLE);
+        this.messageLines = new Text[] {
+                Text.literal("Whoops!").formatted(Formatting.RED),
+                Text.empty()
+                        .append(Text.literal("Lifesteal Mod").formatted(Formatting.GREEN))
+                        .append(Text.literal(" detected you using hacks, specifically "))
+                        .append(Text.literal(detectedClientName).formatted(Formatting.RED))
+                        .append(Text.literal(".")),
+                Text.literal("Using hacks is a big no-no! It's also against The Minecraft EULA and Community Standards!"),
+                Text.literal("I'm gonna have to ask you to quickly go and delete that, kindly.")
+        };
     }
 
     @Override
@@ -42,7 +43,7 @@ public class MeteorDetectedScreen extends Screen {
         context.fill(0, 0, this.width, this.height, 0xC0101010);
         context.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2, this.height / 2 - 85, -1);
         int lineY = this.height / 2 - 60;
-        for (Text line : MESSAGE_LINES) {
+        for (Text line : messageLines) {
             context.drawCenteredTextWithShadow(this.textRenderer, line, this.width / 2, lineY, -1);
             lineY += 14;
         }
