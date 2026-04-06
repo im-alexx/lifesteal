@@ -1,1 +1,1 @@
-For more information, check out the [wiki](https://github.com/iohedviof/lifesteal/wiki)!
+For more information about the mod, check out the new [wiki](https://github.com/iohedviof/lifesteal/wiki)!
