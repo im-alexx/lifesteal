@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class EndCrystalNoExplosionMixin {
     @Inject(method = "damage", at = @At("HEAD"), cancellable = true, require = 0)
     private void lifesteal$removeWithoutExplosion(ServerWorld world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
-        if (!LifestealConfig.get().disableCrystalDamage) {
+        if (!LifestealConfig.get().disableCrystalPVP) {
             return;
         }
 

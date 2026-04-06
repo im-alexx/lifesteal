@@ -5,15 +5,16 @@
   "name": "Lifesteal",
   "description": "An attempt at recreating official Lifesteal Mod with some of my own additions",
   "contributors": [
-    "Hyper"
+    "Hyper",
+    "writtzo"
   ],
   "authors": [
     "Alex"
   ],
   "contact": {
-    "homepage": "https://github.com/iohedviof/lifesteal",
-    "sources": "https://github.com/iohedviof/lifesteal",
-    "issues": "https://github.com/iohedviof/lifesteal/issues"
+    "issues": "https://github.com/iohedviof/lifesteal/issues",
+    "homepage": "https://modrinth.com/project/lifesteal-fabric",
+    "sources": "https://github.com/iohedviof/lifesteal"
   },
   "license": "MIT",
   "icon": "assets/lifesteal/icon.png",
@@ -43,5 +44,15 @@
     "fabricloader": ">=${loader_version}",
     "fabric-api": "*",
     "minecraft": "${minecraft_version}"
+  },
+  "custom": {
+    "modmenu": {
+      "links": {
+        "modmenu.modrinth": "https://modrinth.com/project/lifesteal-fabric",
+        "modmenu.github_releases": "https://github.com/iohedviof/lifesteal/releases",
+        "modmenu.kofi": "https://www.ko-fi.com/bonfolotl",
+        "modmenu.wiki": "https://github.com/iohedviof/lifesteal/wiki"
+      }
+    }
   }
 }

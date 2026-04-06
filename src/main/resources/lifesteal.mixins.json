@@ -6,7 +6,11 @@
   "mixins": [
     "BrewingRecipeRegistryMixin",
     "ApplyEffectsConsumeEffectMixin",
+    "ArrowEntityHitContextMixin",
+    "InstantHealthOrDamageStatusEffectMixin",
     "LivingEntityStrengthClampMixin",
+    "LivingEntityTippedArrowEffectBlockMixin",
+    "SpectralArrowEntityHitContextMixin",
     "ItemStackEnchantmentClampMixin",
     "PlayerEntityMaceCooldownMixin",
     "ServerPlayerEntityMaceCooldownMixin",
@@ -14,8 +18,14 @@
     "EnderPearlCooldownMixin",
     "EndCrystalNoExplosionMixin",
     "TridentRiptideCooldownMixin",
+    "PlayerEntityRiptideCooldownMixin",
+    "ShapedRecipeMaceBlockMixin",
     "SmithingTransformRecipeMixin",
-    "SmithingRecipeMixin"
+    "SmithingRecipeMixin",
+    "TntMinecartExplosionPowerMixin",
+    "LivingEntityTntMinecartDamageMixin",
+    "SlotEnderChestHeartBlockMixin",
+    "ScreenHandlerEnderChestHeartBlockMixin"
   ],
   "injectors": {
     "defaultRequire": 1

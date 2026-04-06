@@ -17,7 +17,19 @@
     "components": {
       "minecraft:custom_data": {
         "lifesteal_heart_type": "crafted"
-      }
+      },
+      "minecraft:lore": [
+        {
+          "text": "Use to gain an extra heart",
+          "color": "white",
+          "italic": false
+        },
+        {
+          "text": "Maximum of 10 hearts",
+          "color": "white",
+          "italic": false
+        }
+      ]
     }
   }
 }

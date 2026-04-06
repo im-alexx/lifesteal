@@ -55,15 +55,11 @@ public final class EnchantmentLimiter {
     }
 
     private static int getMaxLevel(RegistryEntry<Enchantment> enchantment) {
-        if (matchesEnchantment(enchantment, Enchantments.PROTECTION)
-                || matchesEnchantment(enchantment, Enchantments.FIRE_PROTECTION)
-                || matchesEnchantment(enchantment, Enchantments.BLAST_PROTECTION)
-                || matchesEnchantment(enchantment, Enchantments.PROJECTILE_PROTECTION)) {
+        if (matchesEnchantment(enchantment, Enchantments.PROTECTION)) {
             return 3;
         }
         if (matchesEnchantment(enchantment, Enchantments.SHARPNESS)
-                || matchesEnchantment(enchantment, Enchantments.POWER)
-                || matchesEnchantment(enchantment, Enchantments.DENSITY)) {
+                || matchesEnchantment(enchantment, Enchantments.POWER)) {
             return 4;
         }
         return -1;

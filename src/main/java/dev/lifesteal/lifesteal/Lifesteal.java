@@ -18,6 +18,7 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
 import net.minecraft.component.type.LoreComponent;
@@ -26,12 +27,16 @@ import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroups;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.BedBlock;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.registry.Registries;
@@ -48,6 +53,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Rarity;
+import net.minecraft.util.ActionResult;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 
@@ -78,6 +84,7 @@ public class Lifesteal implements ModInitializer {
     public static final double MAX_CRAFTED_HEART_HEALTH = 20.0D;
     public static final int MAX_WITHDRAW_PER_COMMAND = 10;
     public static final String HEART_TYPE_KEY = "lifesteal_heart_type";
+    public static final String HEART_VALUE_KEY = "lifesteal_heart_value";
     public static final String HEART_TYPE_CRAFTED = "crafted";
     public static final String HEART_TYPE_WITHDRAWN = "withdrawn";
     public static final String ELIMINATION_BAN_REASON = "Ran out of hearts";
@@ -248,12 +255,32 @@ public class Lifesteal implements ModInitializer {
             }
         });
 
+        UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
+            LifestealConfig config = LifestealConfig.get();
+            ItemStack heldStack = player.getStackInHand(hand);
+            if (config.disableCrystalPVP && (heldStack.isOf(Items.RESPAWN_ANCHOR)
+                    || world.getBlockState(hitResult.getBlockPos()).isOf(Blocks.RESPAWN_ANCHOR))) {
+                return ActionResult.FAIL;
+            }
+            if (config.disableBedBombing
+                    && !world.getDimension().bedWorks()
+                    && world.getBlockState(hitResult.getBlockPos()).getBlock() instanceof BedBlock) {
+                return ActionResult.FAIL;
+            }
+            return ActionResult.PASS;
+        });
+
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             if (--enchantmentClampCooldown > 0) {
                 return;
             }
             enchantmentClampCooldown = 1;
             for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+                if (LifestealConfig.get().disableTotems) {
+                    purgeTotems(player);
+                }
+                purgeDisallowedPotionEffects(player);
+                normalizeHeartStacks(player);
                 clampPlayerEnchantments(player);
             }
         });
@@ -296,6 +323,7 @@ public class Lifesteal implements ModInitializer {
     }
 
     public static boolean consumeHeart(ServerPlayerEntity player, ItemStack heartStack) {
+        int heartValue = 1;
         if (isCraftedHeart(heartStack) && getPlayerMaxHealth(player) >= MAX_CRAFTED_HEART_HEALTH) {
             player.sendMessage(
                     Text.literal("You can't consume a crafted heart when you're on 10+ hearts").formatted(Formatting.RED),
@@ -303,12 +331,15 @@ public class Lifesteal implements ModInitializer {
             );
             return false;
         }
+        if (!isCraftedHeart(heartStack)) {
+            heartValue = getHeartValue(heartStack, getConfiguredWithdrawnHeartValue());
+        }
 
         if (getPlayerMaxHealth(player) >= getConfiguredMaxHealth()) {
             return false;
         }
 
-        double next = Math.min(getPlayerMaxHealth(player) + HEALTH_DELTA, getConfiguredMaxHealth());
+        double next = Math.min(getPlayerMaxHealth(player) + (HEALTH_DELTA * heartValue), getConfiguredMaxHealth());
         setPlayerMaxHealth(player, next);
         player.getEntityWorld().playSound(
                 null,
@@ -420,16 +451,18 @@ public class Lifesteal implements ModInitializer {
     private static int executeWithdraw(ServerCommandSource source, int amount) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
         ServerPlayerEntity player = source.getPlayerOrThrow();
 
+        int withdrawnHeartValue = getConfiguredWithdrawnHeartValue();
         int removableHearts = (int) Math.floor((getPlayerMaxHealth(player) - MIN_MAX_HEALTH) / HEALTH_DELTA);
-        int withdrawCount = Math.min(amount, removableHearts);
+        int withdrawCount = Math.min(amount, removableHearts / withdrawnHeartValue);
         if (withdrawCount <= 0) {
             return 0;
         }
 
-        setPlayerMaxHealth(player, getPlayerMaxHealth(player) - (withdrawCount * HEALTH_DELTA));
+        setPlayerMaxHealth(player, getPlayerMaxHealth(player) - (withdrawCount * withdrawnHeartValue * HEALTH_DELTA));
 
         ItemStack withdrawnHearts = new ItemStack(HEART, withdrawCount);
         setHeartType(withdrawnHearts, HEART_TYPE_WITHDRAWN);
+        setHeartValue(withdrawnHearts, withdrawnHeartValue);
         if (!player.giveItemStack(withdrawnHearts)) {
             player.dropItem(withdrawnHearts, false);
         }
@@ -463,6 +496,19 @@ public class Lifesteal implements ModInitializer {
         NbtCompound nbt = customData.copyNbt();
         nbt.putString(HEART_TYPE_KEY, type);
         stack.set(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(nbt));
+    }
+
+    public static void setHeartValue(ItemStack stack, int value) {
+        NbtComponent customData = stack.getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT);
+        NbtCompound nbt = customData.copyNbt();
+        nbt.putInt(HEART_VALUE_KEY, Math.max(1, value));
+        stack.set(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(nbt));
+    }
+
+    public static int getHeartValue(ItemStack stack, int fallback) {
+        NbtComponent customData = stack.getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT);
+        int rawValue = customData.copyNbt().getInt(HEART_VALUE_KEY, fallback);
+        return Math.max(1, rawValue);
     }
 
     public static boolean isWithdrawnHeart(ItemStack stack) {
@@ -614,6 +660,11 @@ public class Lifesteal implements ModInitializer {
             return 0;
         }
         LifestealConfig.save();
+        if (!source.getServer().isDedicated()) {
+            LifestealClientConfig clientConfig = LifestealClientConfig.load();
+            clientConfig.applyFrom(LifestealConfig.get());
+            clientConfig.save();
+        }
         if ("enableEnchantmentLimits".equalsIgnoreCase(option.key)) {
             enchantmentClampCooldown = 0;
         }
@@ -676,6 +727,10 @@ public class Lifesteal implements ModInitializer {
 
     private static double getConfiguredMaxHealth() {
         return Math.max(MIN_MAX_HEALTH, LifestealConfig.get().maxHearts * HEALTH_DELTA);
+    }
+
+    private static int getConfiguredWithdrawnHeartValue() {
+        return Math.max(1, LifestealConfig.get().withdrawnHeartValue);
     }
 
     private static void clampOnlinePlayersToConfiguredMax(MinecraftServer server) {
@@ -756,6 +811,83 @@ public class Lifesteal implements ModInitializer {
                 EnchantmentLimiter.clampStack(slot.getStack());
             }
         }
+    }
+
+    private static void purgeTotems(ServerPlayerEntity player) {
+        for (int i = 0; i < player.getInventory().size(); i++) {
+            ItemStack stack = player.getInventory().getStack(i);
+            if (stack.isOf(Items.TOTEM_OF_UNDYING)) {
+                player.getInventory().setStack(i, ItemStack.EMPTY);
+            }
+        }
+    }
+
+    private static void purgeDisallowedPotionEffects(ServerPlayerEntity player) {
+        LifestealConfig config = LifestealConfig.get();
+        if (!config.allowStrengthII) {
+            removeAmplifiedEffect(player, StatusEffects.STRENGTH);
+        }
+        if (!config.allowSwiftnessII) {
+            removeAmplifiedEffect(player, StatusEffects.SPEED);
+        }
+        if (!config.allowDebuffPotions) {
+            player.removeStatusEffect(StatusEffects.POISON);
+            player.removeStatusEffect(StatusEffects.WEAKNESS);
+        }
+    }
+
+    private static void removeAmplifiedEffect(ServerPlayerEntity player, net.minecraft.registry.entry.RegistryEntry<net.minecraft.entity.effect.StatusEffect> effect) {
+        StatusEffectInstance instance = player.getStatusEffect(effect);
+        if (instance == null || instance.getAmplifier() <= 0) {
+            return;
+        }
+        player.removeStatusEffect(effect);
+    }
+
+    private static void normalizeHeartStacks(ServerPlayerEntity player) {
+        for (int i = 0; i < player.getInventory().size(); i++) {
+            normalizeHeartStack(player.getInventory().getStack(i));
+        }
+
+        for (int i = 0; i < player.getEnderChestInventory().size(); i++) {
+            normalizeHeartStack(player.getEnderChestInventory().getStack(i));
+        }
+
+        if (player.currentScreenHandler != null) {
+            for (Slot slot : player.currentScreenHandler.slots) {
+                normalizeHeartStack(slot.getStack());
+            }
+        }
+    }
+
+    private static void normalizeHeartStack(ItemStack stack) {
+        if (!stack.isOf(HEART) || isCraftedHeart(stack)) {
+            return;
+        }
+
+        int configuredValue = getConfiguredWithdrawnHeartValue();
+        if (!isWithdrawnHeart(stack)) {
+            setHeartType(stack, HEART_TYPE_WITHDRAWN);
+        }
+        if (getHeartValue(stack, configuredValue) != configuredValue) {
+            setHeartValue(stack, configuredValue);
+        }
+        setHeartLore(stack, getConfiguredMaxHeartsText());
+    }
+
+    private static int getConfiguredMaxHeartsText() {
+        return Math.max(1, LifestealConfig.get().maxHearts);
+    }
+
+    private static void setHeartLore(ItemStack stack, int maxHearts) {
+        stack.set(DataComponentTypes.LORE, new LoreComponent(List.of(
+                Text.literal("Use to gain an extra heart").styled(style ->
+                        style.withColor(Formatting.WHITE).withItalic(false)
+                ),
+                Text.literal("Maximum of " + maxHearts + " hearts").styled(style ->
+                        style.withColor(Formatting.WHITE).withItalic(false)
+                )
+        )));
     }
 
 }

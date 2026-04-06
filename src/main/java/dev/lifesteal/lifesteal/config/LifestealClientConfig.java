@@ -19,13 +19,23 @@ public final class LifestealClientConfig {
 
     public boolean allowGodApples = false;
     public boolean allowStrengthII = false;
+    public boolean allowSwiftnessII = false;
+    public boolean allowDebuffPotions = false;
+    public boolean allowInstantHealingPotions = false;
+    public boolean allowTippedArrows = false;
     public boolean enableEnchantmentLimits = false;
     public boolean allowNetheriteUpgrades = true;
     public boolean balancedMace = false;
+    public boolean lockMaceRecipe = true;
     public boolean disableEnderPearls = false;
-    public boolean disableCrystalDamage = true;
+    public boolean disableCrystalPVP = true;
+    public boolean disableTotems = false;
+    public boolean disableBedBombing = false;
+    public boolean nerfTntMinecarts = true;
+    public boolean allowTNTMinecarts = true;
     public boolean enableRiptideCooldown = false;
     public int maxHearts = 20;
+    public int withdrawnHeartValue = 1;
     public int riptideCooldown = 200;
     public boolean enableCustomDiscordRpc = true;
 
@@ -38,13 +48,30 @@ public final class LifestealClientConfig {
                 List<String> lines = Files.readAllLines(configPath);
                 config.allowGodApples = getBoolean(lines, "allowGodApples", config.allowGodApples);
                 config.allowStrengthII = getBoolean(lines, "allowStrengthII", config.allowStrengthII);
+                config.allowSwiftnessII = getBoolean(lines, "allowSwiftnessII", config.allowSwiftnessII);
+                config.allowDebuffPotions = getBoolean(lines, "allowDebuffPotions", config.allowDebuffPotions);
+                if (getRawValue(lines, "allowDebuffPotions") == null) {
+                    boolean legacyPoison = getBoolean(lines, "allowPoisonPotions", false);
+                    boolean legacyInstantDamage = getBoolean(lines, "allowInstantDamagePotions", false);
+                    config.allowDebuffPotions = legacyPoison || legacyInstantDamage;
+                }
+                config.allowInstantHealingPotions = getBoolean(lines, "allowInstantHealingPotions", config.allowInstantHealingPotions);
+                config.allowTippedArrows = getBoolean(lines, "allowTippedArrows", config.allowTippedArrows);
                 config.enableEnchantmentLimits = getBoolean(lines, "enableEnchantmentLimits", config.enableEnchantmentLimits);
                 config.allowNetheriteUpgrades = getBoolean(lines, "allowNetheriteUpgrades", config.allowNetheriteUpgrades);
                 config.balancedMace = getBoolean(lines, "balancedMace", config.balancedMace);
+                config.lockMaceRecipe = getBoolean(lines, "lockMaceRecipe", config.lockMaceRecipe);
                 config.disableEnderPearls = getBoolean(lines, "disableEnderPearls", config.disableEnderPearls);
-                config.disableCrystalDamage = getBoolean(lines, "disableEndCrystalDamage", getBoolean(lines, "disableCrystalDamage", config.disableCrystalDamage));
+                config.disableCrystalPVP = getBoolean(lines, "disableCrystalPVP",
+                        getBoolean(lines, "disableEndCrystalDamage",
+                                getBoolean(lines, "disableCrystalDamage", config.disableCrystalPVP)));
+                config.disableTotems = getBoolean(lines, "disableTotems", config.disableTotems);
+                config.disableBedBombing = getBoolean(lines, "disableBedBombing", config.disableBedBombing);
+                config.nerfTntMinecarts = getBoolean(lines, "nerfTntMinecarts", config.nerfTntMinecarts);
+                config.allowTNTMinecarts = getBoolean(lines, "allowTNTMinecarts", config.allowTNTMinecarts);
                 config.enableRiptideCooldown = getBoolean(lines, "enableRiptideCooldown", config.enableRiptideCooldown);
                 config.maxHearts = getInt(lines, "maxHearts", config.maxHearts);
+                config.withdrawnHeartValue = getInt(lines, "withdrawnHeartValue", config.withdrawnHeartValue);
                 config.riptideCooldown = getInt(lines, "riptideCooldown", config.riptideCooldown);
                 config.enableCustomDiscordRpc = getBoolean(lines, "enableCustomDiscordRpc", config.enableCustomDiscordRpc);
             }
@@ -52,6 +79,7 @@ public final class LifestealClientConfig {
             LOGGER.warn("Failed to load client config from {}", configPath, exception);
         }
         config.maxHearts = Math.max(1, Math.min(1000, config.maxHearts));
+        config.withdrawnHeartValue = Math.max(1, Math.min(1000, config.withdrawnHeartValue));
         config.riptideCooldown = Math.max(0, Math.min(72000, config.riptideCooldown));
         return config;
     }
@@ -79,13 +107,23 @@ public final class LifestealClientConfig {
         LifestealClientConfig copy = new LifestealClientConfig();
         copy.allowGodApples = allowGodApples;
         copy.allowStrengthII = allowStrengthII;
+        copy.allowSwiftnessII = allowSwiftnessII;
+        copy.allowDebuffPotions = allowDebuffPotions;
+        copy.allowInstantHealingPotions = allowInstantHealingPotions;
+        copy.allowTippedArrows = allowTippedArrows;
         copy.enableEnchantmentLimits = enableEnchantmentLimits;
         copy.allowNetheriteUpgrades = allowNetheriteUpgrades;
         copy.balancedMace = balancedMace;
+        copy.lockMaceRecipe = lockMaceRecipe;
         copy.disableEnderPearls = disableEnderPearls;
-        copy.disableCrystalDamage = disableCrystalDamage;
+        copy.disableCrystalPVP = disableCrystalPVP;
+        copy.disableTotems = disableTotems;
+        copy.disableBedBombing = disableBedBombing;
+        copy.nerfTntMinecarts = nerfTntMinecarts;
+        copy.allowTNTMinecarts = allowTNTMinecarts;
         copy.enableRiptideCooldown = enableRiptideCooldown;
         copy.maxHearts = maxHearts;
+        copy.withdrawnHeartValue = withdrawnHeartValue;
         copy.riptideCooldown = riptideCooldown;
         copy.enableCustomDiscordRpc = enableCustomDiscordRpc;
         return copy;
@@ -101,25 +139,45 @@ public final class LifestealClientConfig {
 
 allowGodApples: %s
 allowStrengthII: %s
+allowSwiftnessII: %s
+allowDebuffPotions: %s
+allowInstantHealingPotions: %s
+allowTippedArrows: %s
 enableEnchantmentLimits: %s
 allowNetheriteUpgrades: %s
 balancedMace: %s
+lockMaceRecipe: %s
 disableEnderPearls: %s
-disableEndCrystalDamage: %s
+disableCrystalPVP: %s
+disableTotems: %s
+disableBedBombing: %s
+nerfTntMinecarts: %s
+allowTNTMinecarts: %s
 enableRiptideCooldown: %s
 maxHearts: %s
+withdrawnHeartValue: %s
 riptideCooldown: %s
 enableCustomDiscordRpc: %s
 """.formatted(
                     allowGodApples,
                     allowStrengthII,
+                    allowSwiftnessII,
+                    allowDebuffPotions,
+                    allowInstantHealingPotions,
+                    allowTippedArrows,
                     enableEnchantmentLimits,
                     allowNetheriteUpgrades,
                     balancedMace,
+                    lockMaceRecipe,
                     disableEnderPearls,
-                    disableCrystalDamage,
+                    disableCrystalPVP,
+                    disableTotems,
+                    disableBedBombing,
+                    nerfTntMinecarts,
+                    allowTNTMinecarts,
                     enableRiptideCooldown,
                     maxHearts,
+                    withdrawnHeartValue,
                     riptideCooldown,
                     enableCustomDiscordRpc
             );
@@ -132,14 +190,47 @@ enableCustomDiscordRpc: %s
     public void applyTo(LifestealConfig config) {
         config.allowGodApples = allowGodApples;
         config.allowStrengthII = allowStrengthII;
+        config.allowSwiftnessII = allowSwiftnessII;
+        config.allowDebuffPotions = allowDebuffPotions;
+        config.allowInstantHealingPotions = allowInstantHealingPotions;
+        config.allowTippedArrows = allowTippedArrows;
         config.enableEnchantmentLimits = enableEnchantmentLimits;
         config.allowNetheriteUpgrades = allowNetheriteUpgrades;
         config.balancedMace = balancedMace;
+        config.lockMaceRecipe = lockMaceRecipe;
         config.disableEnderPearls = disableEnderPearls;
-        config.disableCrystalDamage = disableCrystalDamage;
+        config.disableCrystalPVP = disableCrystalPVP;
+        config.disableTotems = disableTotems;
+        config.disableBedBombing = disableBedBombing;
+        config.nerfTntMinecarts = nerfTntMinecarts;
+        config.allowTNTMinecarts = allowTNTMinecarts;
         config.enableRiptideCooldown = enableRiptideCooldown;
         config.maxHearts = maxHearts;
+        config.withdrawnHeartValue = withdrawnHeartValue;
         config.riptideCooldown = riptideCooldown;
+    }
+
+    public void applyFrom(LifestealConfig config) {
+        allowGodApples = config.allowGodApples;
+        allowStrengthII = config.allowStrengthII;
+        allowSwiftnessII = config.allowSwiftnessII;
+        allowDebuffPotions = config.allowDebuffPotions;
+        allowInstantHealingPotions = config.allowInstantHealingPotions;
+        allowTippedArrows = config.allowTippedArrows;
+        enableEnchantmentLimits = config.enableEnchantmentLimits;
+        allowNetheriteUpgrades = config.allowNetheriteUpgrades;
+        balancedMace = config.balancedMace;
+        lockMaceRecipe = config.lockMaceRecipe;
+        disableEnderPearls = config.disableEnderPearls;
+        disableCrystalPVP = config.disableCrystalPVP;
+        disableTotems = config.disableTotems;
+        disableBedBombing = config.disableBedBombing;
+        nerfTntMinecarts = config.nerfTntMinecarts;
+        allowTNTMinecarts = config.allowTNTMinecarts;
+        enableRiptideCooldown = config.enableRiptideCooldown;
+        maxHearts = config.maxHearts;
+        withdrawnHeartValue = config.withdrawnHeartValue;
+        riptideCooldown = config.riptideCooldown;
     }
 
     private static boolean getBoolean(List<String> lines, String key, boolean defaultValue) {

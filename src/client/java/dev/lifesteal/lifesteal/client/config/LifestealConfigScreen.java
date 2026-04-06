@@ -53,6 +53,26 @@ public final class LifestealConfigScreen {
                 .setTooltip(Text.literal("Disables Strength II brewing and downgrades Strength II effects to Strength I."))
                 .setSaveConsumer(value -> config.allowStrengthII = value)
                 .build());
+        category.addEntry(entries.startBooleanToggle(Text.literal("Allow Swiftness II"), config.allowSwiftnessII)
+                .setDefaultValue(false)
+                .setTooltip(Text.literal("Disables Swiftness II brewing and downgrades Swiftness II effects to Swiftness I."))
+                .setSaveConsumer(value -> config.allowSwiftnessII = value)
+                .build());
+        category.addEntry(entries.startBooleanToggle(Text.literal("Allow Debuff Potions"), config.allowDebuffPotions)
+                .setDefaultValue(false)
+                .setTooltip(Text.literal("Allows brewing and upgrading poison, weakness, and instant damage potions."))
+                .setSaveConsumer(value -> config.allowDebuffPotions = value)
+                .build());
+        category.addEntry(entries.startBooleanToggle(Text.literal("Allow Instant Healing Potions"), config.allowInstantHealingPotions)
+                .setDefaultValue(false)
+                .setTooltip(Text.literal("Allows brewing and upgrading instant healing potions."))
+                .setSaveConsumer(value -> config.allowInstantHealingPotions = value)
+                .build());
+        category.addEntry(entries.startBooleanToggle(Text.literal("Allow Tipped Arrows"), config.allowTippedArrows)
+                .setDefaultValue(false)
+                .setTooltip(Text.literal("Allows tipped arrows to apply potion effects to players."))
+                .setSaveConsumer(value -> config.allowTippedArrows = value)
+                .build());
         category.addEntry(entries.startBooleanToggle(Text.literal("Enable Enchantment Limits"), config.enableEnchantmentLimits)
                 .setDefaultValue(false)
                 .setTooltip(Text.literal("Clamps specific enchantments to reduced maximum levels."))
@@ -68,15 +88,40 @@ public final class LifestealConfigScreen {
                 .setTooltip(Text.literal("Disables mace enchants and applies a long attack cooldown."))
                 .setSaveConsumer(value -> config.balancedMace = value)
                 .build());
+        category.addEntry(entries.startBooleanToggle(Text.literal("Lock Mace Recipe"), config.lockMaceRecipe)
+                .setDefaultValue(true)
+                .setTooltip(Text.literal("Blocks crafting recipes that output a mace."))
+                .setSaveConsumer(value -> config.lockMaceRecipe = value)
+                .build());
         category.addEntry(entries.startBooleanToggle(Text.literal("Disable Ender Pearls"), config.disableEnderPearls)
                 .setDefaultValue(false)
                 .setTooltip(Text.literal("Prevents players from using ender pearls."))
                 .setSaveConsumer(value -> config.disableEnderPearls = value)
                 .build());
-        category.addEntry(entries.startBooleanToggle(Text.literal("Disable End Crystal Damage"), config.disableCrystalDamage)
+        category.addEntry(entries.startBooleanToggle(Text.literal("Disable Crystal PVP"), config.disableCrystalPVP)
                 .setDefaultValue(true)
-                .setTooltip(Text.literal("Removes player and environment damage from end crystals."))
-                .setSaveConsumer(value -> config.disableCrystalDamage = value)
+                .setTooltip(Text.literal("Disables end crystal damage and respawn anchor usage/placement."))
+                .setSaveConsumer(value -> config.disableCrystalPVP = value)
+                .build());
+        category.addEntry(entries.startBooleanToggle(Text.literal("Disable Totems"), config.disableTotems)
+                .setDefaultValue(false)
+                .setTooltip(Text.literal("Removes all Totems of Undying from inventories every tick."))
+                .setSaveConsumer(value -> config.disableTotems = value)
+                .build());
+        category.addEntry(entries.startBooleanToggle(Text.literal("Disable Bed Bombing"), config.disableBedBombing)
+                .setDefaultValue(false)
+                .setTooltip(Text.literal("Blocks bed explosions in Nether and End by disabling bed interaction there."))
+                .setSaveConsumer(value -> config.disableBedBombing = value)
+                .build());
+        category.addEntry(entries.startBooleanToggle(Text.literal("Nerf TNT Minecarts"), config.nerfTntMinecarts)
+                .setDefaultValue(true)
+                .setTooltip(Text.literal("Reduces TNT minecart explosion radius and caps direct damage."))
+                .setSaveConsumer(value -> config.nerfTntMinecarts = value)
+                .build());
+        category.addEntry(entries.startBooleanToggle(Text.literal("Allow TNT Minecarts"), config.allowTNTMinecarts)
+                .setDefaultValue(true)
+                .setTooltip(Text.literal("If disabled, TNT minecart explosions are blocked entirely."))
+                .setSaveConsumer(value -> config.allowTNTMinecarts = value)
                 .build());
         category.addEntry(entries.startBooleanToggle(Text.literal("Enable Riptide Cooldown"), config.enableRiptideCooldown)
                 .setDefaultValue(false)
@@ -89,6 +134,13 @@ public final class LifestealConfigScreen {
                 .setMax(1000)
                 .setTooltip(Text.literal("Maximum heart count allowed for players."))
                 .setSaveConsumer(value -> config.maxHearts = value)
+                .build());
+        category.addEntry(entries.startIntField(Text.literal("Withdrawn Heart Value"), config.withdrawnHeartValue)
+                .setDefaultValue(1)
+                .setMin(1)
+                .setMax(1000)
+                .setTooltip(Text.literal("Hearts granted by each withdrawn/creative heart item."))
+                .setSaveConsumer(value -> config.withdrawnHeartValue = value)
                 .build());
         category.addEntry(entries.startIntField(Text.literal("Riptide Cooldown"), config.riptideCooldown)
                 .setDefaultValue(200)

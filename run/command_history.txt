@@ -1,50 +1,50 @@
-/gamerule doDaylightCycle false
-/lifesteal reload
-/withdraw 6
-/add @s 1000
-/add @s 10
-/player Test spawn
-/remove Test 100
-/give @s lifesteal:heart
-/remove @s 19
-/spawnpoint
+/lifesteal enableRiptideCooldown true
 /kill
-/give @s netherite_ingot 64
-/give @s mace
-/lifesteal reload
-/summon minecraft:mannequin
-/enchant @s minecraft:aqua_affinity
-/enchant @s minecraft:density 5
-/summon minecraft:mannequin
-/enchant @s minecraft:density 5
-/summon minecraft:mannequin
-/lifesteal allowGodApples
-/lifesteal allowGodApples true
-/lifesteal allowGodApples false
-/lifesteal enableEnchantmentLimits
-/lifesteal allowNetheriteUpgrades
-/lifesteal allowNetheriteUpgrades false
-/playsound minecraft:block.respawn_anchor.charge ambient
-/give @s lifesteal:heart
-/withdraw 1
-/lifesteal allowGodApples
-/lifesteal allowNetheriteUpgrades
-/lifesteal allowNetheriteUpgrades true
-/lifesteal allowNetheriteUpgrades
-/withdraw 2
-/give @s lifesteal:beacon_of_life
-/player Test spawn
-/remove test 10000
-/revive Test
-/player Test spawn
-/lifesteal disableEnderPearls true
-/give @s ender_pearl
-/withdraw 1
-/player Test spawn
-/remove test 10000
-/revive Test
-/lifesteal maxHearts
-/lifesteal disableEnderPearls
-/lifesteal allowGodApples
-/lifesteal allowStrengthII
-/carpet allowListingFakePlayers
+/lifesteal disableBedBombing
+/lifesteal disableBedBombing true
+/lifesteal allowPoisonPotions
+/lifesteal allowPoisonPotions true
+/lifesteal allowPoisonPotions false
+/tick sprint 60s
+/give @s bow
+/enchant @s flame
+/lifesteal allowTNTMinecarts
+/lifesteal allowTNTMinecarts false
+/lifesteal allowTNTMinecarts
+/lifesteal allowTNTMinecarts false
+/lifesteal allowTNTMinecarts
+/lifesteal allowTNTMinecarts false
+/lifesteal allowTNTMinecarts
+/lifesteal allowDebuffPotions
+/lifesteal disableBedBombing
+/lifesteal disableBedBombing true
+/lifesteal disableCrystalPVP
+/lifesteal disableCrystalPVP false
+/give @s glowstone
+/lifesteal disableCrystalPVP true
+/lifesteal disableCrystalPVP false
+/player StrangerGoober spawn
+/gamemode survival StrangerGoober
+/player StrangerGoober spawn
+/remove StrangerGoober 1000
+/carpet creativeNoItemCooldown truwe
+/carpet creativeNoItemCooldown true
+/carpet creativeNoItemCooldown
+/carpet creativeFlySpeed 10000
+/carpet creativeFlySpeed 1000000000000
+/carpet creativeFlySpeed 100000
+/carpet creativeFlySpeed 1000000000000
+/kill
+/carpet
+/locate structure minecraft:stronghold
+/tp @s 1504 ~ 160
+/tp @s ~ ~-50 ~
+/effect give @s minecraft:strength infinite 255 true
+/enchant @s density 5
+/tick freeze
+/tp @s ~ ~1000 ~
+/tick unfreeze
+/effect clear
+/lifesteal allowTippedArrows
+/lifesteal allowTippedArrows true
+/lifesteal allowTippedArrows false

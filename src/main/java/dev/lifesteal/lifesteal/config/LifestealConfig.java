@@ -18,13 +18,23 @@ public final class LifestealConfig {
 
     public boolean allowGodApples = false;
     public boolean allowStrengthII = false;
+    public boolean allowSwiftnessII = false;
+    public boolean allowDebuffPotions = false;
+    public boolean allowInstantHealingPotions = false;
+    public boolean allowTippedArrows = false;
     public boolean enableEnchantmentLimits = false;
     public boolean allowNetheriteUpgrades = true;
     public boolean balancedMace = false;
+    public boolean lockMaceRecipe = true;
     public boolean disableEnderPearls = false;
-    public boolean disableCrystalDamage = true;
+    public boolean disableCrystalPVP = true;
+    public boolean disableTotems = false;
+    public boolean disableBedBombing = false;
+    public boolean nerfTntMinecarts = true;
+    public boolean allowTNTMinecarts = true;
     public boolean enableRiptideCooldown = false;
     public int maxHearts = 20;
+    public int withdrawnHeartValue = 1;
     public int riptideCooldown = 200;
 
     private static LifestealConfig INSTANCE = new LifestealConfig();
@@ -62,13 +72,30 @@ public final class LifestealConfig {
                 List<String> lines = Files.readAllLines(CONFIG_PATH);
                 config.allowGodApples = getBoolean(lines, "allowGodApples", config.allowGodApples);
                 config.allowStrengthII = getBoolean(lines, "allowStrengthII", config.allowStrengthII);
+                config.allowSwiftnessII = getBoolean(lines, "allowSwiftnessII", config.allowSwiftnessII);
+                config.allowDebuffPotions = getBoolean(lines, "allowDebuffPotions", config.allowDebuffPotions);
+                if (getRawValue(lines, "allowDebuffPotions") == null) {
+                    boolean legacyPoison = getBoolean(lines, "allowPoisonPotions", false);
+                    boolean legacyInstantDamage = getBoolean(lines, "allowInstantDamagePotions", false);
+                    config.allowDebuffPotions = legacyPoison || legacyInstantDamage;
+                }
+                config.allowInstantHealingPotions = getBoolean(lines, "allowInstantHealingPotions", config.allowInstantHealingPotions);
+                config.allowTippedArrows = getBoolean(lines, "allowTippedArrows", config.allowTippedArrows);
                 config.enableEnchantmentLimits = getBoolean(lines, "enableEnchantmentLimits", config.enableEnchantmentLimits);
                 config.allowNetheriteUpgrades = getBoolean(lines, "allowNetheriteUpgrades", config.allowNetheriteUpgrades);
                 config.balancedMace = getBoolean(lines, "balancedMace", config.balancedMace);
+                config.lockMaceRecipe = getBoolean(lines, "lockMaceRecipe", config.lockMaceRecipe);
                 config.disableEnderPearls = getBoolean(lines, "disableEnderPearls", config.disableEnderPearls);
-                config.disableCrystalDamage = getBoolean(lines, "disableEndCrystalDamage", getBoolean(lines, "disableCrystalDamage", config.disableCrystalDamage));
+                config.disableCrystalPVP = getBoolean(lines, "disableCrystalPVP",
+                        getBoolean(lines, "disableEndCrystalDamage",
+                                getBoolean(lines, "disableCrystalDamage", config.disableCrystalPVP)));
+                config.disableTotems = getBoolean(lines, "disableTotems", config.disableTotems);
+                config.disableBedBombing = getBoolean(lines, "disableBedBombing", config.disableBedBombing);
+                config.nerfTntMinecarts = getBoolean(lines, "nerfTntMinecarts", config.nerfTntMinecarts);
+                config.allowTNTMinecarts = getBoolean(lines, "allowTNTMinecarts", config.allowTNTMinecarts);
                 config.enableRiptideCooldown = getBoolean(lines, "enableRiptideCooldown", config.enableRiptideCooldown);
                 config.maxHearts = getInt(lines, "maxHearts", config.maxHearts);
+                config.withdrawnHeartValue = getInt(lines, "withdrawnHeartValue", config.withdrawnHeartValue);
                 config.riptideCooldown = getInt(lines, "riptideCooldown", config.riptideCooldown);
             }
         } catch (Exception ignored) {
@@ -92,53 +119,69 @@ public final class LifestealConfig {
             Files.createDirectories(CONFIG_PATH.getParent());
             String contents = """
 # Lifesteal Mod configuration.
-
 # If enabled, enchanted golden apples do not give you any effects.
 allowGodApples: %s
-
 # If enabled, disables Strength II brewing and converts it to Strength I every time you try to apply it to yourself using commands.
 allowStrengthII: %s
-
+# If enabled, disables Swiftness II brewing and converts it to Swiftness I every time you try to apply it to yourself using commands.
+allowSwiftnessII: %s
+# If enabled, debuff potions (poison, weakness, instant damage) can be brewed and upgraded.
+allowDebuffPotions: %s
+# If enabled, instant healing potions can be brewed and upgraded.
+allowInstantHealingPotions: %s
+# If enabled, tipped arrows can apply potion effects.
+allowTippedArrows: %s
 # If enabled, limits enchantment levels to these for specific enchantments:
 # Protection IV -> Protection III
-# Fire Protection IV -> Fire Protection III
-# Blast Protection IV -> Blast Protection III
-# Projectile Protection IV -> Projectile Protection III
 # Sharpness V -> Sharpness IV
 # Power V -> Power IV
-# Density V -> Density IV
 enableEnchantmentLimits: %s
-
 # If enabled, allows netherite upgrades for diamond armor, sword, and axe.
 allowNetheriteUpgrades: %s
-
 # If set to true, maces cannot be enchanted and have a 60-second attack cooldown (shown like ender pearls).
-balancedMace = %s
-
+balancedMace: %s
+# If enabled, blocks crafting recipes that output a mace.
+lockMaceRecipe: %s
 # Disables usage of ender pearls if enabled. Set to false be default
 disableEnderPearls: %s
-
-# Makes crystals be unable to do any environment and player damage
-disableEndCrystalDamage: %s
-
+# Disables crystal PVP mechanics: end crystal damage and respawn anchor usage/placement.
+disableCrystalPVP: %s
+# Removes all Totems of Undying from player inventories every tick.
+disableTotems: %s
+# Disables bed explosions in Nether and End by blocking bed interaction there.
+disableBedBombing: %s
+# If enabled, TNT minecarts have reduced explosion radius and capped direct damage.
+nerfTntMinecarts: %s
+# If disabled, TNT minecart explosions are fully blocked.
+allowTNTMinecarts: %s
 # Enables cooldown for Riptide tridents
 enableRiptideCooldown: %s
-
 # Maximum amount of hearts. Defaults to 20
 maxHearts: %s
-
+# Hearts granted by each withdrawn/creative heart item.
+withdrawnHeartValue: %s
 # Cooldown for Riptide enchantment
 riptideCooldown: %s
 """.formatted(
                     INSTANCE.allowGodApples,
                     INSTANCE.allowStrengthII,
+                    INSTANCE.allowSwiftnessII,
+                    INSTANCE.allowDebuffPotions,
+                    INSTANCE.allowInstantHealingPotions,
+                    INSTANCE.allowTippedArrows,
                     INSTANCE.enableEnchantmentLimits,
                     INSTANCE.allowNetheriteUpgrades,
                     INSTANCE.balancedMace,
+                    INSTANCE.lockMaceRecipe,
                     INSTANCE.disableEnderPearls,
-                    INSTANCE.disableCrystalDamage,
+                    INSTANCE.disableCrystalPVP,
+                    INSTANCE.disableTotems,
+                    INSTANCE.disableBedBombing,
+                    INSTANCE.nerfTntMinecarts,
+                    INSTANCE.allowTNTMinecarts,
                     INSTANCE.enableRiptideCooldown,
                     INSTANCE.maxHearts,
+                    INSTANCE.withdrawnHeartValue,
                     INSTANCE.riptideCooldown
             );
             Files.writeString(CONFIG_PATH, contents);
@@ -193,13 +236,30 @@ riptideCooldown: %s
             String json = Files.readString(legacyJsonPath);
             config.allowGodApples = extractBoolean(json, "allowGodApples", config.allowGodApples);
             config.allowStrengthII = extractBoolean(json, "allowStrengthII", config.allowStrengthII);
+            config.allowSwiftnessII = extractBoolean(json, "allowSwiftnessII", config.allowSwiftnessII);
+            config.allowDebuffPotions = extractBoolean(json, "allowDebuffPotions", config.allowDebuffPotions);
+            if (!json.contains("\"allowDebuffPotions\"")) {
+                boolean legacyPoison = extractBoolean(json, "allowPoisonPotions", false);
+                boolean legacyInstantDamage = extractBoolean(json, "allowInstantDamagePotions", false);
+                config.allowDebuffPotions = legacyPoison || legacyInstantDamage;
+            }
+            config.allowInstantHealingPotions = extractBoolean(json, "allowInstantHealingPotions", config.allowInstantHealingPotions);
+            config.allowTippedArrows = extractBoolean(json, "allowTippedArrows", config.allowTippedArrows);
             config.enableEnchantmentLimits = extractBoolean(json, "enableEnchantmentLimits", config.enableEnchantmentLimits);
             config.allowNetheriteUpgrades = extractBoolean(json, "allowNetheriteUpgrades", config.allowNetheriteUpgrades);
             config.balancedMace = extractBoolean(json, "balancedMace", config.balancedMace);
+            config.lockMaceRecipe = extractBoolean(json, "lockMaceRecipe", config.lockMaceRecipe);
             config.disableEnderPearls = extractBoolean(json, "disableEnderPearls", config.disableEnderPearls);
-            config.disableCrystalDamage = extractBoolean(json, "disableEndCrystalDamage", extractBoolean(json, "disableCrystalDamage", config.disableCrystalDamage));
+            config.disableCrystalPVP = extractBoolean(json, "disableCrystalPVP",
+                    extractBoolean(json, "disableEndCrystalDamage",
+                            extractBoolean(json, "disableCrystalDamage", config.disableCrystalPVP)));
+            config.disableTotems = extractBoolean(json, "disableTotems", config.disableTotems);
+            config.disableBedBombing = extractBoolean(json, "disableBedBombing", config.disableBedBombing);
+            config.nerfTntMinecarts = extractBoolean(json, "nerfTntMinecarts", config.nerfTntMinecarts);
+            config.allowTNTMinecarts = extractBoolean(json, "allowTNTMinecarts", config.allowTNTMinecarts);
             config.enableRiptideCooldown = extractBoolean(json, "enableRiptideCooldown", config.enableRiptideCooldown);
             config.maxHearts = extractInt(json, "maxHearts", config.maxHearts);
+            config.withdrawnHeartValue = extractInt(json, "withdrawnHeartValue", config.withdrawnHeartValue);
             config.riptideCooldown = extractInt(json, "riptideCooldown", config.riptideCooldown);
             Files.deleteIfExists(legacyJsonPath);
         } catch (Exception ignored) {
@@ -230,6 +290,7 @@ riptideCooldown: %s
 
     private static void clamp(LifestealConfig config) {
         config.maxHearts = Math.max(1, Math.min(1000, config.maxHearts));
+        config.withdrawnHeartValue = Math.max(1, Math.min(1000, config.withdrawnHeartValue));
         config.riptideCooldown = Math.max(0, Math.min(72000, config.riptideCooldown));
     }
 
@@ -355,8 +416,36 @@ riptideCooldown: %s
                     value -> LifestealConfig.get().allowStrengthII = value
             ),
             new ConfigOption(
+                    "allowSwiftnessII",
+                    "Disables Swiftness II brewing and downgrades command-applied Swiftness II to Swiftness I.",
+                    DEFAULTS.allowSwiftnessII,
+                    () -> LifestealConfig.get().allowSwiftnessII,
+                    value -> LifestealConfig.get().allowSwiftnessII = value
+            ),
+            new ConfigOption(
+                    "allowDebuffPotions",
+                    "Allows brewing and upgrading debuff potions (poison, weakness, instant damage).",
+                    DEFAULTS.allowDebuffPotions,
+                    () -> LifestealConfig.get().allowDebuffPotions,
+                    value -> LifestealConfig.get().allowDebuffPotions = value
+            ),
+            new ConfigOption(
+                    "allowInstantHealingPotions",
+                    "Allows brewing and upgrading instant healing potions.",
+                    DEFAULTS.allowInstantHealingPotions,
+                    () -> LifestealConfig.get().allowInstantHealingPotions,
+                    value -> LifestealConfig.get().allowInstantHealingPotions = value
+            ),
+            new ConfigOption(
+                    "allowTippedArrows",
+                    "Allows tipped arrows to apply potion effects.",
+                    DEFAULTS.allowTippedArrows,
+                    () -> LifestealConfig.get().allowTippedArrows,
+                    value -> LifestealConfig.get().allowTippedArrows = value
+            ),
+            new ConfigOption(
                     "enableEnchantmentLimits",
-                    "Limits specific enchantments to lower max levels (Protection III, Sharpness IV, Power IV, Density IV).",
+                    "Limits specific enchantments to lower max levels (Protection III, Sharpness IV, Power IV).",
                     DEFAULTS.enableEnchantmentLimits,
                     () -> LifestealConfig.get().enableEnchantmentLimits,
                     value -> LifestealConfig.get().enableEnchantmentLimits = value
@@ -376,6 +465,13 @@ riptideCooldown: %s
                     value -> LifestealConfig.get().balancedMace = value
             ),
             new ConfigOption(
+                    "lockMaceRecipe",
+                    "Blocks crafting recipes that output a mace.",
+                    DEFAULTS.lockMaceRecipe,
+                    () -> LifestealConfig.get().lockMaceRecipe,
+                    value -> LifestealConfig.get().lockMaceRecipe = value
+            ),
+            new ConfigOption(
                     "disableEnderPearls",
                     "Disables ender pearls from being used",
                     DEFAULTS.disableEnderPearls,
@@ -383,11 +479,39 @@ riptideCooldown: %s
                     value -> LifestealConfig.get().disableEnderPearls = value
             ),
             new ConfigOption(
-                    "disableEndCrystalDamage",
-                    "Makes crystals be unable to do any environment and player damage",
-                    DEFAULTS.disableCrystalDamage,
-                    () -> LifestealConfig.get().disableCrystalDamage,
-                    value -> LifestealConfig.get().disableCrystalDamage = value
+                    "disableCrystalPVP",
+                    "Disables end crystal damage and respawn anchor PVP usage.",
+                    DEFAULTS.disableCrystalPVP,
+                    () -> LifestealConfig.get().disableCrystalPVP,
+                    value -> LifestealConfig.get().disableCrystalPVP = value
+            ),
+            new ConfigOption(
+                    "disableTotems",
+                    "Removes all totems from player inventories every tick.",
+                    DEFAULTS.disableTotems,
+                    () -> LifestealConfig.get().disableTotems,
+                    value -> LifestealConfig.get().disableTotems = value
+            ),
+            new ConfigOption(
+                    "disableBedBombing",
+                    "Disables bed explosions in the Nether and End.",
+                    DEFAULTS.disableBedBombing,
+                    () -> LifestealConfig.get().disableBedBombing,
+                    value -> LifestealConfig.get().disableBedBombing = value
+            ),
+            new ConfigOption(
+                    "nerfTntMinecarts",
+                    "Reduces TNT minecart explosion power and caps direct damage.",
+                    DEFAULTS.nerfTntMinecarts,
+                    () -> LifestealConfig.get().nerfTntMinecarts,
+                    value -> LifestealConfig.get().nerfTntMinecarts = value
+            ),
+            new ConfigOption(
+                    "allowTNTMinecarts",
+                    "Allows TNT minecarts to explode. If disabled, TNT minecart explosions are blocked.",
+                    DEFAULTS.allowTNTMinecarts,
+                    () -> LifestealConfig.get().allowTNTMinecarts,
+                    value -> LifestealConfig.get().allowTNTMinecarts = value
             ),
             new ConfigOption(
                     "enableRiptideCooldown",
@@ -404,6 +528,15 @@ riptideCooldown: %s
                     1000,
                     () -> LifestealConfig.get().maxHearts,
                     value -> LifestealConfig.get().maxHearts = value
+            ),
+            new ConfigOption(
+                    "withdrawnHeartValue",
+                    "Hearts granted by each withdrawn/creative heart item.",
+                    DEFAULTS.withdrawnHeartValue,
+                    1,
+                    1000,
+                    () -> LifestealConfig.get().withdrawnHeartValue,
+                    value -> LifestealConfig.get().withdrawnHeartValue = value
             ),
             new ConfigOption(
                     "riptideCooldown",

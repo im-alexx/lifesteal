@@ -1,1 +1,10 @@
-[]
+[
+  {
+    "uuid": "444b26f1-d1ac-4259-84ba-229fc6a23b78",
+    "name": "StrangerGoober",
+    "created": "2026-04-03 22:12:41 +0300",
+    "source": "Lifesteal",
+    "expires": "forever",
+    "reason": "Ran out of hearts"
+  }
+]

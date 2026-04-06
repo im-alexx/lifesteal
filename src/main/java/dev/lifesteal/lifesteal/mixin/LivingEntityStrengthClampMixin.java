@@ -16,7 +16,7 @@ public class LivingEntityStrengthClampMixin {
             argsOnly = true
     )
     private StatusEffectInstance lifesteal$clampStrengthWithSource(StatusEffectInstance effect) {
-        return clampStrength(effect);
+        return clampPotionAmplifier(effect);
     }
 
     @ModifyVariable(
@@ -25,14 +25,16 @@ public class LivingEntityStrengthClampMixin {
             argsOnly = true
     )
     private StatusEffectInstance lifesteal$clampStrength(StatusEffectInstance effect) {
-        return clampStrength(effect);
+        return clampPotionAmplifier(effect);
     }
 
-    private static StatusEffectInstance clampStrength(StatusEffectInstance effect) {
-        if (LifestealConfig.get().allowStrengthII) {
+    private static StatusEffectInstance clampPotionAmplifier(StatusEffectInstance effect) {
+        if (effect == null || effect.getAmplifier() <= 0) {
             return effect;
         }
-        if (effect == null || effect.getEffectType() != StatusEffects.STRENGTH || effect.getAmplifier() <= 0) {
+        boolean clampStrength = effect.getEffectType() == StatusEffects.STRENGTH && !LifestealConfig.get().allowStrengthII;
+        boolean clampSpeed = effect.getEffectType() == StatusEffects.SPEED && !LifestealConfig.get().allowSwiftnessII;
+        if (!clampStrength && !clampSpeed) {
             return effect;
         }
 

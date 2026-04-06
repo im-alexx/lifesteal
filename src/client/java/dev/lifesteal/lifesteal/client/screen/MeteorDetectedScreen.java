@@ -7,20 +7,20 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 public class MeteorDetectedScreen extends Screen {
-    private static final Text TITLE = Text.literal("Game crashed... almost");
+    private static final Text TITLE = Text.empty();
     private final Text[] messageLines;
 
     public MeteorDetectedScreen(String detectedClientName) {
         super(TITLE);
         this.messageLines = new Text[] {
-                Text.literal("Whoops!").formatted(Formatting.RED),
+                Text.literal("Uh oh!").formatted(Formatting.RED),
                 Text.empty()
                         .append(Text.literal("Lifesteal Mod").formatted(Formatting.GREEN))
                         .append(Text.literal(" detected you using hacks, specifically "))
                         .append(Text.literal(detectedClientName).formatted(Formatting.RED))
                         .append(Text.literal(".")),
-                Text.literal("Using hacks is a big no-no! It's also against The Minecraft EULA and Community Standards!"),
-                Text.literal("I'm gonna have to ask you to quickly go and delete that, kindly.")
+                Text.literal("Using hack clients is against The Minecraft EULA and Community Standards!"),
+                Text.literal("Please remove any hack client(s) to be able to play the mod.")
         };
     }
 
@@ -40,7 +40,7 @@ public class MeteorDetectedScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float deltaTicks) {
-        context.fill(0, 0, this.width, this.height, 0xC0101010);
+        context.fill(0, 0, this.width, this.height, 0xFF000000);
         context.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2, this.height / 2 - 85, -1);
         int lineY = this.height / 2 - 60;
         for (Text line : messageLines) {

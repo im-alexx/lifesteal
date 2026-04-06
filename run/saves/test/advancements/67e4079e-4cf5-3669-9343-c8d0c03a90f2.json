@@ -11,5 +11,23 @@
     },
     "done": false
   },
+  "minecraft:recipes/decorations/end_crystal": {
+    "criteria": {
+      "has_ender_eye": "2026-03-30 19:25:44 +0300"
+    },
+    "done": true
+  },
+  "minecraft:recipes/decorations/ender_chest": {
+    "criteria": {
+      "has_ender_eye": "2026-03-30 19:25:44 +0300"
+    },
+    "done": true
+  },
+  "minecraft:story/root": {
+    "criteria": {
+      "crafting_table": "2026-03-30 19:26:09 +0300"
+    },
+    "done": true
+  },
   "DataVersion": 4556
 }

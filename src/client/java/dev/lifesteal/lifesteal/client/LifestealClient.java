@@ -21,7 +21,7 @@ public class LifestealClient implements ClientModInitializer {
     private static final BlockedClientSignature[] BLOCKED_CLIENTS = new BlockedClientSignature[] {
             new BlockedClientSignature("Meteor Client", "meteor-client", "meteor_client", "meteorclient"),
             new BlockedClientSignature("Wurst", "wurst", "wurstclient", "wurst-client"),
-            new BlockedClientSignature("Krypton", "krypton", "krypton-client", "krypton_client", "kryptonclient")
+            new BlockedClientSignature("Krypton Client", "krypton-client", "krypton_client", "kryptonclient")
     };
     private static final int WARNING_DELAY_TICKS = 40;
     private static String detectedBlockedClientName;

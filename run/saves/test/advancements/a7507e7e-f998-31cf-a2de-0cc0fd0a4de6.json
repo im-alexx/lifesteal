@@ -7,6 +7,7 @@
   },
   "minecraft:adventure/adventuring_time": {
     "criteria": {
+      "minecraft:forest": "2026-04-01 10:52:43 +0300",
       "minecraft:snowy_plains": "2026-03-23 21:12:50 +0200",
       "minecraft:jagged_peaks": "2026-02-16 22:13:17 +0200"
     },
@@ -15,6 +16,48 @@
   "minecraft:story/root": {
     "criteria": {
       "crafting_table": "2026-02-16 22:13:17 +0200"
+    },
+    "done": true
+  },
+  "minecraft:nether/explore_nether": {
+    "criteria": {
+      "minecraft:nether_wastes": "2026-04-01 11:01:06 +0300"
+    },
+    "done": false
+  },
+  "minecraft:story/enter_the_nether": {
+    "criteria": {
+      "entered_nether": "2026-04-01 11:01:05 +0300"
+    },
+    "done": true
+  },
+  "minecraft:recipes/combat/mace": {
+    "criteria": {
+      "has_breeze_rod": "2026-04-01 10:58:49 +0300"
+    },
+    "done": true
+  },
+  "minecraft:recipes/misc/wind_charge": {
+    "criteria": {
+      "has_breeze_rod": "2026-04-01 10:58:49 +0300"
+    },
+    "done": true
+  },
+  "minecraft:nether/root": {
+    "criteria": {
+      "entered_nether": "2026-04-01 11:01:05 +0300"
+    },
+    "done": true
+  },
+  "minecraft:end/root": {
+    "criteria": {
+      "entered_end": "2026-04-01 10:59:44 +0300"
+    },
+    "done": true
+  },
+  "minecraft:story/enter_the_end": {
+    "criteria": {
+      "entered_end": "2026-04-01 10:59:44 +0300"
     },
     "done": true
   },
