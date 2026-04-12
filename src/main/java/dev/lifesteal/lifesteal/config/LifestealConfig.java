@@ -33,6 +33,7 @@ public final class LifestealConfig {
     public boolean nerfTntMinecarts = true;
     public boolean allowTNTMinecarts = true;
     public boolean enableRiptideCooldown = false;
+    public boolean hideInvisPlayerKillCredit = false;
     public int maxHearts = 20;
     public int withdrawnHeartValue = 1;
     public int riptideCooldown = 200;
@@ -94,6 +95,7 @@ public final class LifestealConfig {
                 config.nerfTntMinecarts = getBoolean(lines, "nerfTntMinecarts", config.nerfTntMinecarts);
                 config.allowTNTMinecarts = getBoolean(lines, "allowTNTMinecarts", config.allowTNTMinecarts);
                 config.enableRiptideCooldown = getBoolean(lines, "enableRiptideCooldown", config.enableRiptideCooldown);
+                config.hideInvisPlayerKillCredit = getBoolean(lines, "hideInvisPlayerKillCredit", config.hideInvisPlayerKillCredit);
                 config.maxHearts = getInt(lines, "maxHearts", config.maxHearts);
                 config.withdrawnHeartValue = getInt(lines, "withdrawnHeartValue", config.withdrawnHeartValue);
                 config.riptideCooldown = getInt(lines, "riptideCooldown", config.riptideCooldown);
@@ -156,6 +158,8 @@ nerfTntMinecarts: %s
 allowTNTMinecarts: %s
 # Enables cooldown for Riptide tridents
 enableRiptideCooldown: %s
+# If a player kills someone else with invisibility effect applied to them, it will hide them from kill credit message.
+hideInvisPlayerKillCredit: %s
 # Maximum amount of hearts. Defaults to 20
 maxHearts: %s
 # Hearts granted by each withdrawn/creative heart item.
@@ -180,6 +184,7 @@ riptideCooldown: %s
                     INSTANCE.nerfTntMinecarts,
                     INSTANCE.allowTNTMinecarts,
                     INSTANCE.enableRiptideCooldown,
+                    INSTANCE.hideInvisPlayerKillCredit,
                     INSTANCE.maxHearts,
                     INSTANCE.withdrawnHeartValue,
                     INSTANCE.riptideCooldown
@@ -258,6 +263,7 @@ riptideCooldown: %s
             config.nerfTntMinecarts = extractBoolean(json, "nerfTntMinecarts", config.nerfTntMinecarts);
             config.allowTNTMinecarts = extractBoolean(json, "allowTNTMinecarts", config.allowTNTMinecarts);
             config.enableRiptideCooldown = extractBoolean(json, "enableRiptideCooldown", config.enableRiptideCooldown);
+            config.hideInvisPlayerKillCredit = extractBoolean(json, "hideInvisPlayerKillCredit", config.hideInvisPlayerKillCredit);
             config.maxHearts = extractInt(json, "maxHearts", config.maxHearts);
             config.withdrawnHeartValue = extractInt(json, "withdrawnHeartValue", config.withdrawnHeartValue);
             config.riptideCooldown = extractInt(json, "riptideCooldown", config.riptideCooldown);
@@ -519,6 +525,13 @@ riptideCooldown: %s
                     DEFAULTS.enableRiptideCooldown,
                     () -> LifestealConfig.get().enableRiptideCooldown,
                     value -> LifestealConfig.get().enableRiptideCooldown = value
+            ),
+            new ConfigOption(
+                    "hideInvisPlayerKillCredit",
+                    "If a player kills someone else with invisibility effect applied to them, it will hide them from kill credit message.",
+                    DEFAULTS.hideInvisPlayerKillCredit,
+                    () -> LifestealConfig.get().hideInvisPlayerKillCredit,
+                    value -> LifestealConfig.get().hideInvisPlayerKillCredit = value
             ),
             new ConfigOption(
                     "maxHearts",

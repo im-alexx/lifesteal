@@ -34,6 +34,7 @@ public final class LifestealClientConfig {
     public boolean nerfTntMinecarts = true;
     public boolean allowTNTMinecarts = true;
     public boolean enableRiptideCooldown = false;
+    public boolean hideInvisPlayerKillCredit = false;
     public int maxHearts = 20;
     public int withdrawnHeartValue = 1;
     public int riptideCooldown = 200;
@@ -70,6 +71,7 @@ public final class LifestealClientConfig {
                 config.nerfTntMinecarts = getBoolean(lines, "nerfTntMinecarts", config.nerfTntMinecarts);
                 config.allowTNTMinecarts = getBoolean(lines, "allowTNTMinecarts", config.allowTNTMinecarts);
                 config.enableRiptideCooldown = getBoolean(lines, "enableRiptideCooldown", config.enableRiptideCooldown);
+                config.hideInvisPlayerKillCredit = getBoolean(lines, "hideInvisPlayerKillCredit", config.hideInvisPlayerKillCredit);
                 config.maxHearts = getInt(lines, "maxHearts", config.maxHearts);
                 config.withdrawnHeartValue = getInt(lines, "withdrawnHeartValue", config.withdrawnHeartValue);
                 config.riptideCooldown = getInt(lines, "riptideCooldown", config.riptideCooldown);
@@ -122,6 +124,7 @@ public final class LifestealClientConfig {
         copy.nerfTntMinecarts = nerfTntMinecarts;
         copy.allowTNTMinecarts = allowTNTMinecarts;
         copy.enableRiptideCooldown = enableRiptideCooldown;
+        copy.hideInvisPlayerKillCredit = hideInvisPlayerKillCredit;
         copy.maxHearts = maxHearts;
         copy.withdrawnHeartValue = withdrawnHeartValue;
         copy.riptideCooldown = riptideCooldown;
@@ -154,6 +157,7 @@ disableBedBombing: %s
 nerfTntMinecarts: %s
 allowTNTMinecarts: %s
 enableRiptideCooldown: %s
+hideInvisPlayerKillCredit: %s
 maxHearts: %s
 withdrawnHeartValue: %s
 riptideCooldown: %s
@@ -176,6 +180,7 @@ enableCustomDiscordRpc: %s
                     nerfTntMinecarts,
                     allowTNTMinecarts,
                     enableRiptideCooldown,
+                    hideInvisPlayerKillCredit,
                     maxHearts,
                     withdrawnHeartValue,
                     riptideCooldown,
@@ -205,6 +210,7 @@ enableCustomDiscordRpc: %s
         config.nerfTntMinecarts = nerfTntMinecarts;
         config.allowTNTMinecarts = allowTNTMinecarts;
         config.enableRiptideCooldown = enableRiptideCooldown;
+        config.hideInvisPlayerKillCredit = hideInvisPlayerKillCredit;
         config.maxHearts = maxHearts;
         config.withdrawnHeartValue = withdrawnHeartValue;
         config.riptideCooldown = riptideCooldown;
@@ -228,6 +234,7 @@ enableCustomDiscordRpc: %s
         nerfTntMinecarts = config.nerfTntMinecarts;
         allowTNTMinecarts = config.allowTNTMinecarts;
         enableRiptideCooldown = config.enableRiptideCooldown;
+        hideInvisPlayerKillCredit = config.hideInvisPlayerKillCredit;
         maxHearts = config.maxHearts;
         withdrawnHeartValue = config.withdrawnHeartValue;
         riptideCooldown = config.riptideCooldown;

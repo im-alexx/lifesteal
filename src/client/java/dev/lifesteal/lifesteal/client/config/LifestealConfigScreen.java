@@ -128,6 +128,11 @@ public final class LifestealConfigScreen {
                 .setTooltip(Text.literal("Adds a cooldown after using Riptide."))
                 .setSaveConsumer(value -> config.enableRiptideCooldown = value)
                 .build());
+        category.addEntry(entries.startBooleanToggle(Text.literal("Hide Invis Player Kill Credit"), config.hideInvisPlayerKillCredit)
+                .setDefaultValue(false)
+                .setTooltip(Text.literal("If a player kills someone else with invisibility effect applied to them, it will hide them from kill credit message."))
+                .setSaveConsumer(value -> config.hideInvisPlayerKillCredit = value)
+                .build());
         category.addEntry(entries.startIntField(Text.literal("Max Hearts"), config.maxHearts)
                 .setDefaultValue(20)
                 .setMin(1)

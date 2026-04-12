@@ -16,6 +16,7 @@
     "ServerPlayerEntityMaceCooldownMixin",
     "EnderPearlItemDisableMixin",
     "EnderPearlCooldownMixin",
+    "DamageTrackerInvisKillCreditMixin",
     "EndCrystalNoExplosionMixin",
     "TridentRiptideCooldownMixin",
     "PlayerEntityRiptideCooldownMixin",

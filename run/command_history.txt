@@ -1,20 +1,3 @@
-/lifesteal enableRiptideCooldown true
-/kill
-/lifesteal disableBedBombing
-/lifesteal disableBedBombing true
-/lifesteal allowPoisonPotions
-/lifesteal allowPoisonPotions true
-/lifesteal allowPoisonPotions false
-/tick sprint 60s
-/give @s bow
-/enchant @s flame
-/lifesteal allowTNTMinecarts
-/lifesteal allowTNTMinecarts false
-/lifesteal allowTNTMinecarts
-/lifesteal allowTNTMinecarts false
-/lifesteal allowTNTMinecarts
-/lifesteal allowTNTMinecarts false
-/lifesteal allowTNTMinecarts
 /lifesteal allowDebuffPotions
 /lifesteal disableBedBombing
 /lifesteal disableBedBombing true
@@ -48,3 +31,20 @@
 /lifesteal allowTippedArrows
 /lifesteal allowTippedArrows true
 /lifesteal allowTippedArrows false
+/player Test spawn
+/gamemode survival test
+/lifesteal hideInvisPlayerKillCredit
+/lifesteal hideInvisPlayerKillCredit true
+/tp Test
+/effect clear Test
+/kill Test
+/player Test spawn
+/effect clear @s
+/player Test spawn
+/lifesteal hideInvisPlayerKillCredit
+/player Test spawn
+/give @s mace[minecraft:max_damage=1]
+/give @s minecraft:wind_charge
+/player Test spawn
+/give @s minecraft:wind_charge
+/player Test spawn
