@@ -1,21 +1,3 @@
-/lifesteal allowDebuffPotions
-/lifesteal disableBedBombing
-/lifesteal disableBedBombing true
-/lifesteal disableCrystalPVP
-/lifesteal disableCrystalPVP false
-/give @s glowstone
-/lifesteal disableCrystalPVP true
-/lifesteal disableCrystalPVP false
-/player StrangerGoober spawn
-/gamemode survival StrangerGoober
-/player StrangerGoober spawn
-/remove StrangerGoober 1000
-/carpet creativeNoItemCooldown truwe
-/carpet creativeNoItemCooldown true
-/carpet creativeNoItemCooldown
-/carpet creativeFlySpeed 10000
-/carpet creativeFlySpeed 1000000000000
-/carpet creativeFlySpeed 100000
 /carpet creativeFlySpeed 1000000000000
 /kill
 /carpet
@@ -48,3 +30,21 @@
 /player Test spawn
 /give @s minecraft:wind_charge
 /player Test spawn
+/give @s netherite_sword[crafted_heart=true]
+/give @s netherite_sword[lifesteal:crafted_heart=true]
+/give @s diamond_chestplate[lock={}]
+/give @s diamond_chestplate[minecraft:custom_data={"lifesteal:limits_enchants":false}]
+/list
+/lifesteal enableEnchantmentLimits
+/lifesteal enableEnchantmentLimits true
+/enchant @s minecraft:protection 4
+/give @s minecraft:netherite_chestplate[minecraft:custom_data={"lifesteal:limits_enchants":false}]
+/enchant @s minecraft:protection 4
+/give @s minecraft:netherite_chestplate[minecraft:custom_data={"lifesteal:enchantment_limited":false}]
+/enchant @s minecraft:protection 4
+/give @s lifesteal:heart[minecraft:custom_data={"lifesteal:crafted_heart":true}]
+/add @s 1
+/give @s lifesteal:heart[minecraft:custom_data={"lifesteal:crafted_heart":true}]
+/lifesteal disableTotems true
+/give @s minecraft:totem_of_undying
+/tp @s ~ ~25 ~

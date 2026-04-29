@@ -42,6 +42,9 @@ repositories {
     maven {
         url "https://maven.shedaniel.me/"
     }
+    maven {
+        url "https://maven.quiltmc.org/repository/release/"
+    }
     mavenCentral()
 }
 
@@ -53,10 +56,9 @@ dependencies {
 
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    // Dev-only runtime mod (not required for builds or consumers)
-    modRuntimeOnly "curse.maven:carpet-349239:7113642"
-    modImplementation "curse.maven:modmenu-308702:7444262"
-    modApi("me.shedaniel.cloth:cloth-config-fabric:21.11.153") {
+    // Dev-only runtime mod removed for 1.21.5 compatibility.
+    modImplementation "curse.maven:modmenu-308702:7808731"
+    modApi("me.shedaniel.cloth:cloth-config-fabric:18.0.145") {
         exclude(group: "net.fabricmc.fabric-api")
     }
     implementation include("io.github.CDAGaming:DiscordIPC:0.10.2")
@@ -66,14 +68,53 @@ dependencies {
 processResources {
     inputs.property "version", project.version
     inputs.property "minecraft_version", project.minecraft_version
+    inputs.property "minecraft_supported_range", project.minecraft_supported_range
     inputs.property "loader_version", project.loader_version
+    inputs.property "quilt_loader_version", project.quilt_loader_version
     filteringCharset "UTF-8"
 
-    filesMatching("fabric.mod.json") {
+    filesMatching(["fabric.mod.json", "quilt.mod.json"]) {
         expand "version": project.version,
                 "minecraft_version": project.minecraft_version,
+                "minecraft_supported_range": project.minecraft_supported_range,
+                "loader_version": project.loader_version,
+                "quilt_loader_version": project.quilt_loader_version
+    }
+}
+
+tasks.register("discordIpcFakeModJar", Jar) {
+    archiveBaseName.set("discord-ipc-fake-mod")
+    archiveClassifier.set("embedded")
+    destinationDirectory.set(layout.buildDirectory.dir("generated/discord-ipc"))
+
+    from("src/discordipcmod/resources") {
+        // Copy all child-mod resources as-is (no text templating on binaries).
+        exclude("fabric.mod.json")
+        exclude("assets/discord-ipc/icon.png")
+    }
+    from("src/discordipcmod/resources/fabric.mod.json") {
+        filteringCharset = "UTF-8"
+        expand "minecraft_supported_range": project.minecraft_supported_range,
                 "loader_version": project.loader_version
     }
+    from("src/main/resources/assets/lifesteal/icon/discord_ipc.png") {
+        into("assets/discord-ipc")
+        rename { "icon.png" }
+    }
+}
+
+tasks.named("remapJar") {
+    nestedJars.from(tasks.named("discordIpcFakeModJar"))
+}
+
+tasks.register("prepareDiscordIpcDevMod", Copy) {
+    dependsOn(tasks.named("discordIpcFakeModJar"))
+    from(tasks.named("discordIpcFakeModJar"))
+    into(layout.projectDirectory.dir("run/mods"))
+}
+
+tasks.named("runClient") {
+    dependsOn(tasks.named("prepareDiscordIpcDevMod"))
 }
 
 def targetJavaVersion = 21

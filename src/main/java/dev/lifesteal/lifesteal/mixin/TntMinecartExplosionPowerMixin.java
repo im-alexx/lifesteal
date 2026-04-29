@@ -24,7 +24,7 @@ public class TntMinecartExplosionPowerMixin {
             return;
         }
         TntMinecartEntity minecart = (TntMinecartEntity) (Object) this;
-        if (minecart.getEntityWorld() instanceof ServerWorld world) {
+        if (minecart.getWorld() instanceof ServerWorld world) {
             double x = minecart.getX();
             double y = minecart.getY();
             double z = minecart.getZ();
@@ -51,3 +51,4 @@ public class TntMinecartExplosionPowerMixin {
         return power * 0.5F;
     }
 }
+

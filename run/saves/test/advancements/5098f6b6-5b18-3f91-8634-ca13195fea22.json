@@ -1,0 +1,22 @@
+{
+  "minecraft:recipes/decorations/crafting_table": {
+    "criteria": {
+      "unlock_right_away": "2026-04-20 12:59:08 +0300"
+    },
+    "done": true
+  },
+  "minecraft:story/shiny_gear": {
+    "criteria": {
+      "diamond_chestplate": "2026-04-20 12:59:32 +0300"
+    },
+    "done": true
+  },
+  "minecraft:adventure/adventuring_time": {
+    "criteria": {
+      "minecraft:forest": "2026-04-20 12:59:09 +0300",
+      "minecraft:snowy_plains": "2026-04-20 12:59:21 +0300"
+    },
+    "done": false
+  },
+  "DataVersion": 4556
+}

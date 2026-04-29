@@ -8,6 +8,7 @@
     "ApplyEffectsConsumeEffectMixin",
     "ArrowEntityHitContextMixin",
     "InstantHealthOrDamageStatusEffectMixin",
+    "LivingEntityDisableTotemMixin",
     "LivingEntityStrengthClampMixin",
     "LivingEntityTippedArrowEffectBlockMixin",
     "SpectralArrowEntityHitContextMixin",

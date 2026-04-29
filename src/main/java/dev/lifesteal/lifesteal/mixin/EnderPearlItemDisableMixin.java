@@ -18,11 +18,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class EnderPearlItemDisableMixin {
     @Inject(method = "use", at = @At("HEAD"), cancellable = true)
     private void lifesteal$disablePearlUse(World world, PlayerEntity user, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
+        // Apply this rule only on the logical server so remote clients don't use local
+        // config values for multiplayer prediction.
+        if (world.isClient()) {
+            return;
+        }
         if (!LifestealConfig.get().disableEnderPearls) {
             return;
         }
-        user.setCurrentHand(hand);
-        cir.setReturnValue(ActionResult.CONSUME);
+        cir.setReturnValue(ActionResult.FAIL);
     }
 
     @Inject(method = "getMaxUseTime", at = @At("HEAD"), cancellable = true, require = 0)

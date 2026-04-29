@@ -80,9 +80,6 @@ public class LifestealClient implements ClientModInitializer {
 
         warningShown = true;
         LOGGER.info("Opening blocked client warning screen on tick for {}.", detectedBlockedClientName);
-        if (client.world != null) {
-            client.disconnect(Text.literal("Lifesteal Mod detected " + detectedBlockedClientName + "."));
-        }
         client.setScreen(new MeteorDetectedScreen(detectedBlockedClientName));
     }
 

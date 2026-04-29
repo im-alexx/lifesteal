@@ -44,7 +44,7 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.PlayerConfigEntry;
+import net.minecraft.server.BannedPlayerEntry;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.ClickEvent;
@@ -85,6 +85,11 @@ public class Lifesteal implements ModInitializer {
     public static final int MAX_WITHDRAW_PER_COMMAND = 10;
     public static final String HEART_TYPE_KEY = "lifesteal_heart_type";
     public static final String HEART_VALUE_KEY = "lifesteal_heart_value";
+    public static final String CRAFTED_HEART_KEY = "lifesteal:crafted_heart";
+    public static final String CRAFTED_HEAR_KEY_LEGACY = "lifesteal:crafted_hear";
+    public static final String ENCHANTMENT_LIMITED_KEY = "lifesteal:enchantment_limited";
+    public static final String LIMITS_ENCHANTMENTS_KEY_LEGACY = "lifesteal:limits_enchantments";
+    public static final String LIMITS_ENCHANTS_KEY_LEGACY = "lifesteal:limits_enchants";
     public static final String HEART_TYPE_CRAFTED = "crafted";
     public static final String HEART_TYPE_WITHDRAWN = "withdrawn";
     public static final String ELIMINATION_BAN_REASON = "Ran out of hearts";
@@ -237,7 +242,7 @@ public class Lifesteal implements ModInitializer {
         });
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-            if (TEST_MODE_ENABLED && !isWhitelistedForTestMode(handler.player.getGameProfile().name())) {
+            if (TEST_MODE_ENABLED && !isWhitelistedForTestMode(handler.player.getGameProfile().getName())) {
                 handler.player.networkHandler.disconnect(Text.literal(TEST_MODE_KICK_MESSAGE));
                 return;
             }
@@ -276,9 +281,6 @@ public class Lifesteal implements ModInitializer {
             }
             enchantmentClampCooldown = 1;
             for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-                if (LifestealConfig.get().disableTotems) {
-                    purgeTotems(player);
-                }
                 purgeDisallowedPotionEffects(player);
                 normalizeHeartStacks(player);
                 clampPlayerEnchantments(player);
@@ -311,13 +313,13 @@ public class Lifesteal implements ModInitializer {
             } else {
                 // Natural/mob/void/etc. deaths drop one untagged heart item.
                 ItemEntity heartDrop = new ItemEntity(
-                        player.getEntityWorld(),
+                        player.getWorld(),
                         player.getX(),
                         player.getY(),
                         player.getZ(),
                         new ItemStack(HEART)
                 );
-                player.getEntityWorld().spawnEntity(heartDrop);
+                player.getWorld().spawnEntity(heartDrop);
             }
         });
     }
@@ -341,7 +343,7 @@ public class Lifesteal implements ModInitializer {
 
         double next = Math.min(getPlayerMaxHealth(player) + (HEALTH_DELTA * heartValue), getConfiguredMaxHealth());
         setPlayerMaxHealth(player, next);
-        player.getEntityWorld().playSound(
+        player.getWorld().playSound(
                 null,
                 player.getX(),
                 player.getY(),
@@ -355,13 +357,13 @@ public class Lifesteal implements ModInitializer {
     }
 
     public static boolean reviveBannedPlayer(MinecraftServer server, ServerPlayerEntity reviver, String targetName) {
-        Optional<com.mojang.authlib.GameProfile> profile = server.getApiServices().profileResolver().getProfileByName(targetName);
+        Optional<com.mojang.authlib.GameProfile> profile = server.getUserCache().findByName(targetName);
         if (profile.isEmpty()) {
             reviver.sendMessage(Text.translatable("message.lifesteal.revive_failed", targetName), false);
             return false;
         }
 
-        PlayerConfigEntry configEntry = new PlayerConfigEntry(profile.get());
+        com.mojang.authlib.GameProfile configEntry = profile.get();
         var banEntry = server.getPlayerManager().getUserBanList().get(configEntry);
         if (banEntry == null || !ELIMINATION_BAN_REASON.equals(banEntry.getReason())) {
             reviver.sendMessage(Text.translatable("message.lifesteal.revive_failed", targetName), false);
@@ -369,12 +371,12 @@ public class Lifesteal implements ModInitializer {
         }
 
         server.getPlayerManager().getUserBanList().remove(configEntry);
-        PENDING_REVIVED_PLAYERS.add(profile.get().id());
+        PENDING_REVIVED_PLAYERS.add(profile.get().getId());
 
-        ServerPlayerEntity onlineTarget = server.getPlayerManager().getPlayer(profile.get().id());
+        ServerPlayerEntity onlineTarget = server.getPlayerManager().getPlayer(profile.get().getId());
         if (onlineTarget != null) {
             setPlayerMaxHealth(onlineTarget, REVIVED_MAX_HEALTH);
-            PENDING_REVIVED_PLAYERS.remove(profile.get().id());
+            PENDING_REVIVED_PLAYERS.remove(profile.get().getId());
         }
 
         server.getPlayerManager().broadcast(
@@ -385,25 +387,14 @@ public class Lifesteal implements ModInitializer {
     }
 
     public static List<String> getBannedProfiles(MinecraftServer server) {
-        List<String> names = new ArrayList<>();
-        for (var entry : server.getPlayerManager().getUserBanList().values()) {
-            if (!ELIMINATION_BAN_REASON.equals(entry.getReason())) {
-                continue;
-            }
-            Object key = entry.getKey();
-            if (key instanceof PlayerConfigEntry playerEntry) {
-                names.add(playerEntry.name());
-            }
-        }
-        return names;
+        return new ArrayList<>(List.of(server.getPlayerManager().getUserBanList().getNames()));
     }
 
     public static ItemStack createHeadFor(MinecraftServer server, String playerName) {
         ItemStack head = new ItemStack(Items.PLAYER_HEAD);
-        server.getApiServices()
-                .profileResolver()
-                .getProfileByName(playerName)
-                .ifPresent(profile -> head.set(DataComponentTypes.PROFILE, ProfileComponent.ofStatic(profile)));
+        server.getUserCache()
+                .findByName(playerName)
+                .ifPresent(profile -> head.set(DataComponentTypes.PROFILE, new ProfileComponent(profile)));
         head.set(DataComponentTypes.CUSTOM_NAME, Text.literal(playerName));
         return head;
     }
@@ -432,17 +423,27 @@ public class Lifesteal implements ModInitializer {
     }
 
     private static void banForRunningOutOfHearts(ServerPlayerEntity player) {
-        var banEntry = new net.minecraft.server.BannedPlayerEntry(
-                new PlayerConfigEntry(player.getGameProfile()),
+        var banEntry = new BannedPlayerEntry(
+                player.getGameProfile(),
                 null,
                 "Lifesteal",
                 null,
                 ELIMINATION_BAN_REASON
         );
-        MinecraftServer server = player.getEntityWorld().getServer();
+        MinecraftServer server = player.getWorld().getServer();
+        player.getWorld().playSound(
+                null,
+                player.getX(),
+                player.getY(),
+                player.getZ(),
+                SoundEvents.ENTITY_WITHER_SPAWN,
+                SoundCategory.HOSTILE,
+                1.0F,
+                1.0F
+        );
         server.getPlayerManager().getUserBanList().add(banEntry);
         server.getPlayerManager().broadcast(
-                Text.literal(player.getGameProfile().name() + " was banned").formatted(Formatting.RED),
+                Text.literal(player.getGameProfile().getName() + " was banned").formatted(Formatting.RED),
                 false
         );
         player.networkHandler.disconnect(Text.literal("You are banned").formatted(Formatting.RED));
@@ -495,6 +496,13 @@ public class Lifesteal implements ModInitializer {
         NbtComponent customData = stack.getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT);
         NbtCompound nbt = customData.copyNbt();
         nbt.putString(HEART_TYPE_KEY, type);
+        if (HEART_TYPE_CRAFTED.equals(type)) {
+            nbt.putBoolean(CRAFTED_HEART_KEY, true);
+            nbt.putBoolean(CRAFTED_HEAR_KEY_LEGACY, true);
+        } else if (HEART_TYPE_WITHDRAWN.equals(type)) {
+            nbt.putBoolean(CRAFTED_HEART_KEY, false);
+            nbt.putBoolean(CRAFTED_HEAR_KEY_LEGACY, false);
+        }
         stack.set(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(nbt));
     }
 
@@ -519,8 +527,51 @@ public class Lifesteal implements ModInitializer {
 
     public static boolean isCraftedHeart(ItemStack stack) {
         NbtComponent customData = stack.getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT);
-        String type = customData.copyNbt().getString(HEART_TYPE_KEY, "");
+        NbtCompound nbt = customData.copyNbt();
+        if (nbt.contains(CRAFTED_HEART_KEY)) {
+            return nbt.getBoolean(CRAFTED_HEART_KEY, false);
+        }
+        if (nbt.contains(CRAFTED_HEAR_KEY_LEGACY)) {
+            return nbt.getBoolean(CRAFTED_HEAR_KEY_LEGACY, false);
+        }
+        String type = nbt.getString(HEART_TYPE_KEY, "");
         return HEART_TYPE_CRAFTED.equals(type);
+    }
+
+    public static void setCraftedHeart(ItemStack stack, boolean crafted) {
+        NbtComponent customData = stack.getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT);
+        NbtCompound nbt = customData.copyNbt();
+        nbt.putBoolean(CRAFTED_HEART_KEY, crafted);
+        nbt.putBoolean(CRAFTED_HEAR_KEY_LEGACY, crafted);
+        stack.set(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(nbt));
+    }
+
+    public static void setEnchantmentLimited(ItemStack stack, boolean limited) {
+        NbtComponent customData = stack.getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT);
+        NbtCompound nbt = customData.copyNbt();
+        nbt.putBoolean(ENCHANTMENT_LIMITED_KEY, limited);
+        nbt.putBoolean(LIMITS_ENCHANTMENTS_KEY_LEGACY, limited);
+        nbt.putBoolean(LIMITS_ENCHANTS_KEY_LEGACY, limited);
+        stack.set(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(nbt));
+    }
+
+    public static void setLimitsEnchantments(ItemStack stack, boolean limitsEnchantments) {
+        setEnchantmentLimited(stack, limitsEnchantments);
+    }
+
+    public static boolean shouldLimitEnchantments(ItemStack stack) {
+        NbtComponent customData = stack.getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT);
+        NbtCompound nbt = customData.copyNbt();
+        if (nbt.contains(ENCHANTMENT_LIMITED_KEY)) {
+            return nbt.getBoolean(ENCHANTMENT_LIMITED_KEY, true);
+        }
+        if (nbt.contains(LIMITS_ENCHANTMENTS_KEY_LEGACY)) {
+            return nbt.getBoolean(LIMITS_ENCHANTMENTS_KEY_LEGACY, true);
+        }
+        if (nbt.contains(LIMITS_ENCHANTS_KEY_LEGACY)) {
+            return nbt.getBoolean(LIMITS_ENCHANTS_KEY_LEGACY, true);
+        }
+        return true;
     }
 
     private static int executeTestModeOn(ServerCommandSource source) {
@@ -584,13 +635,13 @@ public class Lifesteal implements ModInitializer {
     }
 
     private static int executeRevive(ServerCommandSource source, String playerName) {
-        Optional<com.mojang.authlib.GameProfile> profile = source.getServer().getApiServices().profileResolver().getProfileByName(playerName);
+        Optional<com.mojang.authlib.GameProfile> profile = source.getServer().getUserCache().findByName(playerName);
         if (profile.isEmpty()) {
             source.sendError(Text.translatable("message.lifesteal.revive_failed", playerName));
             return 0;
         }
 
-        PlayerConfigEntry configEntry = new PlayerConfigEntry(profile.get());
+        com.mojang.authlib.GameProfile configEntry = profile.get();
         var banEntry = source.getServer().getPlayerManager().getUserBanList().get(configEntry);
         if (banEntry == null || !ELIMINATION_BAN_REASON.equals(banEntry.getReason())) {
             source.sendError(Text.translatable("message.lifesteal.revive_failed", playerName));
@@ -598,12 +649,12 @@ public class Lifesteal implements ModInitializer {
         }
 
         source.getServer().getPlayerManager().getUserBanList().remove(configEntry);
-        PENDING_REVIVED_PLAYERS.add(profile.get().id());
+        PENDING_REVIVED_PLAYERS.add(profile.get().getId());
 
-        ServerPlayerEntity onlineTarget = source.getServer().getPlayerManager().getPlayer(profile.get().id());
+        ServerPlayerEntity onlineTarget = source.getServer().getPlayerManager().getPlayer(profile.get().getId());
         if (onlineTarget != null) {
             setPlayerMaxHealth(onlineTarget, REVIVED_MAX_HEALTH);
-            PENDING_REVIVED_PLAYERS.remove(profile.get().id());
+            PENDING_REVIVED_PLAYERS.remove(profile.get().getId());
         }
 
         source.getServer().getPlayerManager().broadcast(
@@ -709,11 +760,11 @@ public class Lifesteal implements ModInitializer {
 
     private static void kickNonWhitelistedPlayers(MinecraftServer server, ServerCommandSource source) {
         String executorName = source.getEntity() instanceof ServerPlayerEntity sourcePlayer
-                ? normalizeName(sourcePlayer.getGameProfile().name())
+                ? normalizeName(sourcePlayer.getGameProfile().getName())
                 : null;
 
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-            String playerName = normalizeName(player.getGameProfile().name());
+            String playerName = normalizeName(player.getGameProfile().getName());
             if (isWhitelistedForTestMode(playerName)) {
                 continue;
             }
@@ -813,15 +864,6 @@ public class Lifesteal implements ModInitializer {
         }
     }
 
-    private static void purgeTotems(ServerPlayerEntity player) {
-        for (int i = 0; i < player.getInventory().size(); i++) {
-            ItemStack stack = player.getInventory().getStack(i);
-            if (stack.isOf(Items.TOTEM_OF_UNDYING)) {
-                player.getInventory().setStack(i, ItemStack.EMPTY);
-            }
-        }
-    }
-
     private static void purgeDisallowedPotionEffects(ServerPlayerEntity player) {
         LifestealConfig config = LifestealConfig.get();
         if (!config.allowStrengthII) {
@@ -861,7 +903,15 @@ public class Lifesteal implements ModInitializer {
     }
 
     private static void normalizeHeartStack(ItemStack stack) {
-        if (!stack.isOf(HEART) || isCraftedHeart(stack)) {
+        if (!stack.isOf(HEART)) {
+            return;
+        }
+
+        if (isCraftedHeart(stack)) {
+            if (!HEART_TYPE_CRAFTED.equals(getHeartType(stack))) {
+                setHeartType(stack, HEART_TYPE_CRAFTED);
+            }
+            setCraftedHeartLore(stack);
             return;
         }
 
@@ -872,14 +922,25 @@ public class Lifesteal implements ModInitializer {
         if (getHeartValue(stack, configuredValue) != configuredValue) {
             setHeartValue(stack, configuredValue);
         }
-        setHeartLore(stack, getConfiguredMaxHeartsText());
+        setWithdrawnHeartLore(stack, getConfiguredMaxHeartsText());
     }
 
     private static int getConfiguredMaxHeartsText() {
         return Math.max(1, LifestealConfig.get().maxHearts);
     }
 
-    private static void setHeartLore(ItemStack stack, int maxHearts) {
+    private static void setCraftedHeartLore(ItemStack stack) {
+        stack.set(DataComponentTypes.LORE, new LoreComponent(List.of(
+                Text.literal("Use to gain an extra heart").styled(style ->
+                        style.withColor(Formatting.WHITE).withItalic(false)
+                ),
+                Text.literal("Maximum hearts set by config").styled(style ->
+                        style.withColor(Formatting.WHITE).withItalic(false)
+                )
+        )));
+    }
+
+    private static void setWithdrawnHeartLore(ItemStack stack, int maxHearts) {
         stack.set(DataComponentTypes.LORE, new LoreComponent(List.of(
                 Text.literal("Use to gain an extra heart").styled(style ->
                         style.withColor(Formatting.WHITE).withItalic(false)
@@ -890,4 +951,10 @@ public class Lifesteal implements ModInitializer {
         )));
     }
 
+    private static String getHeartType(ItemStack stack) {
+        NbtComponent customData = stack.getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT);
+        return customData.copyNbt().getString(HEART_TYPE_KEY, "");
+    }
+
 }
+

@@ -45,6 +45,7 @@ public class HeartItem extends Item {
     @Override
     public void onCraftByPlayer(ItemStack stack, PlayerEntity player) {
         Lifesteal.setHeartType(stack, Lifesteal.HEART_TYPE_CRAFTED);
+        Lifesteal.setCraftedHeart(stack, true);
         super.onCraftByPlayer(stack, player);
     }
 }

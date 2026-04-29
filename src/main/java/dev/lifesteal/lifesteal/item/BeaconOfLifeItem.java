@@ -28,12 +28,12 @@ public class BeaconOfLifeItem extends Item {
             return ActionResult.PASS;
         }
 
-        List<String> bannedPlayers = Lifesteal.getBannedProfiles(serverPlayer.getEntityWorld().getServer());
+        List<String> bannedPlayers = Lifesteal.getBannedProfiles(serverPlayer.getWorld().getServer());
         serverPlayer.openHandledScreen(new SimpleNamedScreenHandlerFactory(
                 (syncId, playerInventory, player) -> ReviveMenuScreenHandler.create(
                         syncId,
                         playerInventory,
-                        serverPlayer.getEntityWorld().getServer(),
+                        serverPlayer.getWorld().getServer(),
                         bannedPlayers,
                         hand == Hand.OFF_HAND
                 ),
@@ -43,3 +43,4 @@ public class BeaconOfLifeItem extends Item {
         return ActionResult.CONSUME;
     }
 }
+

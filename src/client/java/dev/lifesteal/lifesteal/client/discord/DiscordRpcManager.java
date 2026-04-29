@@ -22,12 +22,15 @@ public final class DiscordRpcManager {
     private static final String LARGE_IMAGE_KEY = "lifesteal";
     private static final String LARGE_IMAGE_TEXT = "Lifesteal";
     private static final int UPDATE_INTERVAL_TICKS = 20;
+    private static final long RETRY_COOLDOWN_MS = 15_000L;
 
     private static IPCClient client;
     private static int updateTicker;
     private static String lastDetails = "";
     private static String lastState = "";
     private static boolean shutdownHookRegistered;
+    private static long nextConnectAttemptAtMs;
+    private static boolean discordUnavailableLogged;
 
     private DiscordRpcManager() {
     }
@@ -108,7 +111,14 @@ public final class DiscordRpcManager {
     }
 
     private static boolean ensureConnected() {
+        long now = System.currentTimeMillis();
+        if (now < nextConnectAttemptAtMs) {
+            return false;
+        }
+
         if (client != null && client.getStatus() == PipeStatus.CONNECTED) {
+            nextConnectAttemptAtMs = 0L;
+            discordUnavailableLogged = false;
             return true;
         }
         if (client != null && client.getStatus() == PipeStatus.CONNECTING) {
@@ -120,9 +130,15 @@ public final class DiscordRpcManager {
             client = new IPCClient(MINECRAFT_APPLICATION_ID);
             client.connect();
             LOGGER.info("Discord RPC connected.");
+            nextConnectAttemptAtMs = 0L;
+            discordUnavailableLogged = false;
             return client.getStatus() == PipeStatus.CONNECTED;
         } catch (Throwable throwable) {
-            LOGGER.debug("Discord IPC unavailable, custom presence disabled for this session.", throwable);
+            nextConnectAttemptAtMs = now + RETRY_COOLDOWN_MS;
+            if (!discordUnavailableLogged) {
+                LOGGER.info("Discord RPC idle: Discord app is not available. Will retry automatically.");
+                discordUnavailableLogged = true;
+            }
             shutdown();
             return false;
         }

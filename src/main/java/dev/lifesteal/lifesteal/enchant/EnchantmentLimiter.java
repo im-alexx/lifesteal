@@ -1,5 +1,6 @@
 package dev.lifesteal.lifesteal.enchant;
 
+import dev.lifesteal.lifesteal.Lifesteal;
 import dev.lifesteal.lifesteal.config.LifestealConfig;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.ComponentType;
@@ -16,6 +17,9 @@ public final class EnchantmentLimiter {
 
     public static void clampStack(ItemStack stack) {
         if (!LifestealConfig.get().enableEnchantmentLimits) {
+            return;
+        }
+        if (!Lifesteal.shouldLimitEnchantments(stack)) {
             return;
         }
 

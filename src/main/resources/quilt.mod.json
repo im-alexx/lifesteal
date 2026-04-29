@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "quilt_loader": {
+    "group": "dev.lifesteal",
+    "id": "lifesteal",
+    "version": "${version}",
+    "name": "Lifesteal",
+    "description": "An attempt at recreating official Lifesteal Mod with some of my own additions. Quilt support is currently experimental and may not work on all supported Minecraft versions.",
+    "contributors": {
+      "Envi": "Author",
+      "Hyper": "Playtester, Artist",
+      "writtzo": "Playtester"
+    },
+    "contact": {
+      "issues": "https://github.com/iohedviof/lifesteal/issues",
+      "homepage": "https://modrinth.com/project/lifesteal-fabric",
+      "sources": "https://github.com/iohedviof/lifesteal"
+    },
+    "license": "MIT",
+    "icon": "assets/lifesteal/icon.png",
+    "intermediate_mappings": "net.fabricmc:intermediary",
+    "environment": "*",
+    "entrypoints": {
+      "init": [
+        "dev.lifesteal.lifesteal.Lifesteal"
+      ],
+      "client_init": [
+        "dev.lifesteal.lifesteal.client.LifestealClient"
+      ],
+      "modmenu": [
+        "dev.lifesteal.lifesteal.client.config.LifestealModMenuIntegration"
+      ],
+      "fabric-datagen": [
+        "dev.lifesteal.lifesteal.client.LifestealDataGenerator"
+      ]
+    },
+    "depends": [
+      {
+        "id": "quilt_loader",
+        "version": "${quilt_loader_version}"
+      },
+      {
+        "id": "fabric-api",
+        "version": "*"
+      },
+      {
+        "id": "minecraft",
+        "version": "${minecraft_supported_range}"
+      }
+    ]
+  },
+  "mixin": [
+    "lifesteal.mixins.json",
+    {
+      "config": "lifesteal.client.mixins.json",
+      "environment": "client"
+    }
+  ]
+}

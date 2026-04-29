@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "lifesteal",
-  "version": "${version}",
+  "version": "0.3.2.1",
   "name": "Lifesteal",
   "description": "An attempt at recreating official Lifesteal Mod with some of my own additions",
   "contributors": [
@@ -9,7 +9,7 @@
     "writtzo"
   ],
   "authors": [
-    "Alex"
+    "Envi"
   ],
   "contact": {
     "issues": "https://github.com/iohedviof/lifesteal/issues",
@@ -43,7 +43,7 @@
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric-api": "*",
-    "minecraft": "${minecraft_version}"
+    "minecraft": "${minecraft_supported_range}"
   },
   "custom": {
     "modmenu": {

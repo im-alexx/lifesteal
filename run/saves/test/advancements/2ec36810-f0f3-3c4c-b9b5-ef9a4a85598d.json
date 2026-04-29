@@ -13,9 +13,16 @@
   },
   "minecraft:adventure/adventuring_time": {
     "criteria": {
-      "minecraft:river": "2026-04-03 22:18:40 +0300"
+      "minecraft:river": "2026-04-03 22:18:40 +0300",
+      "minecraft:snowy_plains": "2026-04-20 13:39:29 +0300"
     },
     "done": false
+  },
+  "minecraft:story/shiny_gear": {
+    "criteria": {
+      "diamond_chestplate": "2026-04-20 13:40:11 +0300"
+    },
+    "done": true
   },
   "DataVersion": 4556
 }

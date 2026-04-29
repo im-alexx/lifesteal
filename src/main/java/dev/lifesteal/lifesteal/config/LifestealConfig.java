@@ -144,11 +144,11 @@ allowNetheriteUpgrades: %s
 balancedMace: %s
 # If enabled, blocks crafting recipes that output a mace.
 lockMaceRecipe: %s
-# Disables usage of ender pearls if enabled. Set to false be default
+# Disables usage of ender pearls if enabled. Set to false by default
 disableEnderPearls: %s
 # Disables crystal PVP mechanics: end crystal damage and respawn anchor usage/placement.
 disableCrystalPVP: %s
-# Removes all Totems of Undying from player inventories every tick.
+# Disables Totem of Undying death protection while keeping totems in inventories.
 disableTotems: %s
 # Disables bed explosions in Nether and End by blocking bed interaction there.
 disableBedBombing: %s

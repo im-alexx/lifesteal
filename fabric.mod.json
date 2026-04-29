@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "discord-ipc",
+  "version": "1.0.0-lifesteal",
+  "name": "Discord IPC",
+  "description": "Hidden library that brings Discord RPC integration into the mod",
+  "icon": "assets/discord-ipc/icon.png",
+  "environment": "client",
+  "depends": {
+    "fabricloader": ">=0.18.5",
+    "minecraft": "1.21.5"
+  },
+  "custom": {
+    "modmenu": {
+      "badges": [
+        "library"
+      ],
+      "parent": "lifesteal"
+    }
+  }
+}
